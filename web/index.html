@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#573b56">
+  <meta name="description" content="NariBondhu is a gentle, privacy-first women's health companion for menstrual health, PCOS, PMS and everyday wellbeing.">
+  <title>NariBondhu — Your health, your pace</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <div class="app-frame">
+    <aside class="sidebar" aria-label="Main navigation">
+      <a class="brand" href="#home" aria-label="NariBondhu home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" role="img">
+            <path d="M24 39c-9-5-14-11-14-18 0-5 3-8 7-8 3 0 5 2 7 5 2-3 4-5 7-5 4 0 7 3 7 8 0 7-5 13-14 18Z" fill="currentColor" opacity=".96"/>
+            <path d="M24 33c-3-5-4-9-4-13 0-4 2-7 4-9 2 2 4 5 4 9 0 4-1 8-4 13Z" fill="#d7a6a7"/>
+          </svg>
+        </span>
+        <span class="brand-copy">
+          <strong>NariBondhu</strong>
+          <small>Women's health companion</small>
+        </span>
+      </a>
+
+      <div class="sidebar-label" data-i18n="navYourSpace">YOUR SPACE</div>
+      <nav class="side-nav">
+        <a class="nav-link is-active" href="#home" data-route="home"><span class="nav-symbol">⌂</span><span data-i18n="navHome">Home</span></a>
+        <a class="nav-link" href="#tracker" data-route="tracker"><span class="nav-symbol">◷</span><span data-i18n="navHealth">My Health</span></a>
+        <a class="nav-link" href="#learn" data-route="learn"><span class="nav-symbol">▤</span><span data-i18n="navLearn">Health Library</span></a>
+        <a class="nav-link" href="#bondhuhelp" data-route="bondhuhelp"><span class="nav-symbol">✚</span><span data-i18n="navHelp">BondhuHelp</span></a>
+        <a class="nav-link" href="#assistant" data-route="assistant"><span class="nav-symbol">✧</span><span data-i18n="navAi">NariBondhu AI</span><span class="nav-soon">Preview</span></a>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="privacy-mini">
+          <span class="privacy-dot"></span>
+          <span><strong data-i18n="privateDemo">Private demo</strong><small data-i18n="localOnly">Saved on this device</small></span>
+        </div>
+        <a class="nav-link profile-link" href="#profile" data-route="profile"><span class="nav-symbol">◉</span><span data-i18n="navProfile">Profile & privacy</span></a>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="topbar">
+        <div class="topbar-heading">
+          <span class="topbar-eyebrow" data-i18n="topEyebrow">YOUR PRIVATE SPACE</span>
+          <strong id="current-page-title">Home</strong>
+        </div>
+        <div class="topbar-actions">
+          <span class="local-pill"><span class="privacy-dot"></span><span data-i18n="localBadge">Local preview</span></span>
+          <button class="quiet-button language-button" id="language-toggle" type="button" aria-label="Switch language">বাংলা</button>
+          <button class="quiet-button discreet-button" id="discreet-toggle" type="button" aria-pressed="false"><span aria-hidden="true">◉</span><span data-i18n="discreet">Discreet mode</span></button>
+        </div>
+      </header>
+
+      <main id="main-content" class="main-content">
+        <div class="demo-banner" id="demo-banner" hidden>
+          <span class="demo-banner-icon" aria-hidden="true">✦</span>
+          <p><strong data-i18n="samplePreview">Sample preview</strong><span data-i18n="sampleNotice"> — these illustrative entries are not your personal health records.</span></p>
+          <button class="text-button" type="button" data-action="start-own-data" data-i18n="useMyData">Use my own data</button>
+        </div>
+
+        <section class="page is-active" id="page-home" data-page="home">
+          <div class="hero-card">
+            <div class="hero-copy">
+              <span class="eyebrow light-eyebrow"><span class="eyebrow-dot"></span><span data-i18n="heroEyebrow">A LITTLE SPACE FOR YOU</span></span>
+              <h1 data-i18n="heroTitle">Understand your body.<br>Care at your own pace.</h1>
+              <p data-i18n="heroText">A warm, private place to notice your cycle, understand symptoms and find the right information — without judgement.</p>
+              <div class="hero-actions">
+                <button class="primary-button pale-button" type="button" data-action="add-period"><span aria-hidden="true">＋</span><span data-i18n="logPeriod">Log a period</span></button>
+                <a class="hero-link" href="#learn" data-route="learn"><span data-i18n="exploreLibrary">Explore the health library</span><span aria-hidden="true">↗</span></a>
+              </div>
+              <div class="hero-trust"><span>✓</span><span data-i18n="heroTrust">Your demo entries stay in this browser</span></div>
+            </div>
+            <div class="hero-art" aria-hidden="true">
+              <div class="art-orbit orbit-one"></div>
+              <div class="art-orbit orbit-two"></div>
+              <div class="art-disc"><span class="art-flower">✿</span><span class="art-heart">♡</span></div>
+              <span class="art-spark spark-one">✦</span><span class="art-spark spark-two">✧</span>
+              <span class="art-leaf leaf-one"></span><span class="art-leaf leaf-two"></span>
+              <div class="art-note"><span class="note-dot"></span><span data-i18n="gentleReminder">You deserve gentle care</span></div>
+            </div>
+          </div>
+
+          <div class="section-heading dashboard-heading">
+            <div><span class="eyebrow" data-i18n="yourOverview">YOUR OVERVIEW</span><h2 data-i18n="cycleOverview">Your cycle at a glance</h2></div>
+            <a href="#tracker" class="subtle-link" data-route="tracker"><span data-i18n="viewTracker">Open tracker</span><span aria-hidden="true">→</span></a>
+          </div>
+
+          <div class="overview-grid">
+            <article class="card cycle-card">
+              <div class="card-topline"><span class="card-icon plum-icon">◷</span><span class="status-label" data-i18n="cycleEstimate">CYCLE ESTIMATE</span></div>
+              <div class="cycle-main">
+                <div class="cycle-ring" id="cycle-ring"><div><strong id="cycle-day">19</strong><small data-i18n="cycleDay">cycle day</small></div></div>
+                <div class="cycle-copy"><h3 id="cycle-status">Your cycle is in progress</h3><p id="cycle-description">Your entries help build a clearer picture over time.</p><span class="tiny-note" id="cycle-confidence">Illustrative sample · 28-day average</span></div>
+              </div>
+              <div class="card-divider"></div>
+              <div class="mini-stats">
+                <div><span data-i18n="averageCycle">Average cycle</span><strong id="average-cycle">28 days</strong></div>
+                <div><span data-i18n="periodsLogged">Periods logged</span><strong id="periods-count">2</strong></div>
+              </div>
+            </article>
+
+            <article class="card next-card">
+              <div class="card-topline"><span class="card-icon rose-icon">♡</span><span class="status-label" data-i18n="nextEstimate">NEXT PERIOD ESTIMATE</span></div>
+              <p class="next-label" data-i18n="estimatedStart">Estimated start</p>
+              <strong class="next-date" id="next-period-date">Dec 1</strong>
+              <p class="next-countdown" id="next-period-countdown">About 10 days from now</p>
+              <div class="estimate-footnote"><span aria-hidden="true">ⓘ</span><span data-i18n="estimateDisclaimer">An estimate only — cycles can naturally vary.</span></div>
+            </article>
+
+            <article class="card quick-card">
+              <div class="card-topline"><span class="card-icon lavender-icon">✦</span><span class="status-label" data-i18n="quickActions">QUICK ACTIONS</span></div>
+              <button class="quick-action" type="button" data-action="add-period"><span class="quick-action-icon">＋</span><span><strong data-i18n="logPeriod">Log a period</strong><small data-i18n="logPeriodHint">Record a period or spotting</small></span><span class="action-arrow">→</span></button>
+              <button class="quick-action" type="button" data-action="add-symptom"><span class="quick-action-icon">♡</span><span><strong data-i18n="logSymptom">Log a symptom</strong><small data-i18n="logSymptomHint">Note how you feel today</small></span><span class="action-arrow">→</span></button>
+              <button class="quick-action" type="button" data-action="add-wellness"><span class="quick-action-icon">☼</span><span><strong data-i18n="logWellness">Daily wellbeing</strong><small data-i18n="logWellnessHint">Mood, sleep and energy</small></span><span class="action-arrow">→</span></button>
+            </article>
+          </div>
+
+          <div class="section-heading"><div><span class="eyebrow" data-i18n="madeForRealLife">MADE FOR REAL LIFE</span><h2 data-i18n="yourHealthSpace">Your health, your way</h2></div></div>
+          <div class="feature-grid">
+            <button class="feature-card" type="button" data-route="tracker"><span class="feature-icon feature-lilac">◷</span><strong data-i18n="featureCycleTitle">Cycle & diary</strong><span data-i18n="featureCycleText">Keep period dates and personal notes together.</span><span class="feature-arrow">↗</span></button>
+            <button class="feature-card" type="button" data-route="learn"><span class="feature-icon feature-rose">✿</span><strong data-i18n="featureLearnTitle">Learn with confidence</strong><span data-i18n="featureLearnText">Read simple guides on PCOS, PMS and intimate health.</span><span class="feature-arrow">↗</span></button>
+            <button class="feature-card" type="button" data-route="bondhuhelp"><span class="feature-icon feature-peach">＋</span><strong data-i18n="featureCareTitle">Prepare for care</strong><span data-i18n="featureCareText">Organise your concerns before speaking with a clinician.</span><span class="feature-arrow">↗</span></button>
+          </div>
+
+          <div class="safety-card">
+            <div class="safety-icon">!</div>
+            <div><strong data-i18n="safetyTitle">When to seek urgent care</strong><p data-i18n="safetyText">Very heavy bleeding with dizziness or fainting, severe pelvic pain, or bleeding/pain during pregnancy needs urgent medical assessment. Do not wait for an app response.</p></div>
+            <a href="tel:999" class="safety-call"><span data-i18n="call999">Call 999</span><span aria-hidden="true">↗</span></a>
+          </div>
+
+          <div class="bottom-note"><span class="note-shield">◇</span><span data-i18n="bottomPrivacy">Your health is personal. This browser demo does not send your entries to a server.</span></div>
+        </section>
+
+        <section class="page" id="page-tracker" data-page="tracker">
+          <div class="page-intro">
+            <span class="eyebrow" data-i18n="trackerEyebrow">YOUR PERSONAL JOURNAL</span>
+            <h1 data-i18n="trackerTitle">My Health</h1>
+            <p data-i18n="trackerIntro">Track your cycle and daily patterns in one calm, private space.</p>
+            <div class="intro-actions"><button class="primary-button" type="button" data-action="add-period">＋ <span data-i18n="logPeriod">Log a period</span></button><button class="outline-button" type="button" data-action="add-symptom">＋ <span data-i18n="logSymptom">Log a symptom</span></button></div>
+          </div>
+
+          <div class="tracker-layout">
+            <article class="card calendar-card">
+              <div class="calendar-header"><div><span class="eyebrow" data-i18n="cycleCalendar">CYCLE CALENDAR</span><h2 id="calendar-month-label">November 2026</h2></div><div class="calendar-controls"><button type="button" aria-label="Previous month" data-action="calendar-prev">‹</button><button type="button" aria-label="Next month" data-action="calendar-next">›</button></div></div>
+              <div class="calendar-weekdays" id="calendar-weekdays"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+              <div class="calendar-grid" id="calendar-grid"></div>
+              <div class="calendar-legend"><span><i class="legend-dot period-dot"></i><span data-i18n="periodDays">Period</span></span><span><i class="legend-dot spotting-dot"></i><span data-i18n="spotting">Spotting</span></span><span><i class="legend-dot estimate-dot"></i><span data-i18n="estimatedDays">Estimated</span></span></div>
+              <div class="selected-day" id="selected-day-detail" aria-live="polite"></div>
+            </article>
+
+            <div class="tracker-side">
+              <article class="card insight-card">
+                <span class="eyebrow" data-i18n="cycleInsights">CYCLE INSIGHTS</span>
+                <div class="insight-row"><span data-i18n="lastPeriod">Last period started</span><strong id="last-period-start">Nov 3, 2026</strong></div>
+                <div class="insight-row"><span data-i18n="averageCycle">Average cycle</span><strong id="tracker-average">28 days</strong></div>
+                <div class="insight-row"><span data-i18n="nextEstimate">Next period estimate</span><strong id="tracker-next">Dec 1, 2026</strong></div>
+                <p class="tiny-note" data-i18n="trackerEstimateNote">Estimates need at least two recorded period starts and are not a medical prediction.</p>
+              </article>
+              <article class="card history-card">
+                <div class="card-heading-row"><div><span class="eyebrow" data-i18n="recentEntries">RECENT ENTRIES</span><h2 data-i18n="periodHistory">Period history</h2></div><button class="icon-button" type="button" data-action="add-period" aria-label="Add period">＋</button></div>
+                <div id="period-history" class="entry-list"></div>
+              </article>
+            </div>
+          </div>
+
+          <div class="section-heading diary-heading"><div><span class="eyebrow" data-i18n="noticePatterns">NOTICE YOUR PATTERNS</span><h2 data-i18n="dailyDiary">Daily diary</h2></div><div class="diary-actions"><button class="outline-button small-button" type="button" data-action="add-wellness">＋ <span data-i18n="wellbeing">Wellbeing</span></button><button class="primary-button small-button" type="button" data-action="add-symptom">＋ <span data-i18n="symptom">Symptom</span></button></div></div>
+          <div class="diary-grid">
+            <article class="card diary-card"><div class="card-heading-row"><div><span class="eyebrow" data-i18n="bodyNotes">BODY NOTES</span><h2 data-i18n="symptomDiary">Symptom diary</h2></div><span class="card-icon rose-icon">♡</span></div><div id="symptom-list" class="entry-list"></div></article>
+            <article class="card diary-card"><div class="card-heading-row"><div><span class="eyebrow" data-i18n="dailyCheckin">DAILY CHECK-IN</span><h2 data-i18n="wellbeingLog">Wellbeing log</h2></div><span class="card-icon lavender-icon">☼</span></div><div id="wellness-list" class="entry-list"></div></article>
+          </div>
+          <p class="discreet-footnote" data-i18n="trackerPrivacy">Entries are stored in this browser only. This demo does not sync with your Android app or Firebase account.</p>
+        </section>
+
+        <section class="page" id="page-learn" data-page="learn">
+          <div class="page-intro">
+            <span class="eyebrow" data-i18n="libraryEyebrow">KNOWLEDGE WITHOUT JUDGEMENT</span>
+            <h1 data-i18n="libraryTitle">Health Library</h1>
+            <p data-i18n="libraryIntro">Clear, approachable information to help you understand your body and prepare for a clinician conversation.</p>
+          </div>
+          <div class="library-feature">
+            <div class="library-feature-icon">✿</div><div><span class="eyebrow light-eyebrow" data-i18n="learnAtYourPace">LEARN AT YOUR PACE</span><h2 data-i18n="libraryFeatureTitle">Small steps. Better questions. More confidence.</h2><p data-i18n="libraryFeatureText">Use these guides as a starting point, not a substitute for personalised medical advice.</p></div>
+          </div>
+          <div class="filter-row" id="article-filters" aria-label="Filter health articles">
+            <button class="filter-chip is-selected" type="button" data-filter="all" data-i18n="filterAll">All topics</button>
+            <button class="filter-chip" type="button" data-filter="PCOS">PCOS</button>
+            <button class="filter-chip" type="button" data-filter="PMS">PMS</button>
+            <button class="filter-chip" type="button" data-filter="Menstrual" data-i18n="filterCycle">Cycle health</button>
+            <button class="filter-chip" type="button" data-filter="Intimate" data-i18n="filterIntimate">Intimate health</button>
+          </div>
+          <div class="article-grid" id="article-grid"></div>
+          <div class="clinical-note"><span class="note-shield">◇</span><div><strong data-i18n="clinicalNoteTitle">A note about health information</strong><p data-i18n="clinicalNoteText">These guides are educational. They cannot diagnose a condition, interpret your personal test results or recommend medicines. Speak with a qualified clinician about your own health.</p></div></div>
+        </section>
+
+        <section class="page" id="page-bondhuhelp" data-page="bondhuhelp">
+          <div class="page-intro">
+            <span class="eyebrow" data-i18n="careEyebrow">SUPPORT FOR YOUR NEXT STEP</span>
+            <h1 data-i18n="careTitle">BondhuHelp</h1>
+            <p data-i18n="careIntro">Prepare for a thoughtful conversation with a qualified healthcare professional.</p>
+          </div>
+          <div class="care-hero">
+            <div class="care-hero-copy"><span class="eyebrow light-eyebrow" data-i18n="careStartsHere">CARE STARTS WITH A CONVERSATION</span><h2 data-i18n="careHeroTitle">You deserve to be heard.</h2><p data-i18n="careHeroText">A clear timeline of your symptoms and questions can make a doctor visit feel easier.</p><button class="primary-button pale-button" type="button" data-action="visit-checklist" data-i18n="prepareVisit">Prepare for a visit</button></div>
+            <div class="care-hero-art" aria-hidden="true"><span>♡</span><i></i><b></b></div>
+          </div>
+          <div class="care-grid">
+            <article class="card care-card"><span class="care-card-icon">▤</span><h2 data-i18n="beforeVisitTitle">Before your visit</h2><p data-i18n="beforeVisitText">Write down when symptoms started, how often they happen, and what makes them better or worse.</p><button class="subtle-link-button" type="button" data-action="visit-checklist"><span data-i18n="openChecklist">Open checklist</span> →</button></article>
+            <article class="card care-card"><span class="care-card-icon">⌕</span><h2 data-i18n="verifyCareTitle">Choose care carefully</h2><p data-i18n="verifyCareText">Check a clinician's current BMDC registration and confirm the clinic, fees and appointment details directly.</p><a class="subtle-link-button" href="https://www.bmdc.org.bd/" target="_blank" rel="noopener noreferrer"><span data-i18n="visitBmdc">Visit BMDC website</span> ↗</a></article>
+            <article class="card care-card"><span class="care-card-icon">♡</span><h2 data-i18n="shareChoiceTitle">Your information, your choice</h2><p data-i18n="shareChoiceText">Only share the health notes or reports you feel comfortable discussing with your clinician.</p><button class="subtle-link-button" type="button" data-route="profile"><span data-i18n="privacySettings">Privacy settings</span> →</button></article>
+          </div>
+          <div class="directory-notice"><span class="notice-icon">ⓘ</span><div><strong data-i18n="directoryNotLiveTitle">Live doctor booking is not connected in this web preview.</strong><p data-i18n="directoryNotLiveText">The Android repository contains a provider catalogue, but this browser demo does not verify provider credentials, availability or fees. It therefore does not display those entries as live recommendations or accept bookings.</p></div></div>
+          <div class="emergency-card"><div class="emergency-mark">!</div><div><strong data-i18n="urgentCareTitle">Need urgent help?</strong><p data-i18n="urgentCareText">For severe symptoms or immediate danger, go to the nearest emergency department. In Bangladesh, call 999 for emergency assistance.</p></div><a href="tel:999" class="emergency-button" data-i18n="call999">Call 999</a></div>
+        </section>
+
+        <section class="page" id="page-assistant" data-page="assistant">
+          <div class="page-intro">
+            <span class="eyebrow" data-i18n="assistantEyebrow">EDUCATION, WITH SAFETY FIRST</span>
+            <h1 data-i18n="assistantTitle">NariBondhu AI</h1>
+            <p data-i18n="assistantIntro">A future educational companion designed to explain women's health topics in simple English or বাংলা.</p>
+          </div>
+          <div class="ai-preview-card">
+            <div class="ai-orb"><span>✧</span></div>
+            <span class="status-pill status-pending" data-i18n="notConnected">Not connected in this demo</span>
+            <h2 data-i18n="aiDemoTitle">Your AI guide needs a secure connection.</h2>
+            <p data-i18n="aiDemoText">This website is running without Google AI Studio or Gemini API tokens. No question is sent to an AI service, and no generated medical answer is simulated.</p>
+            <div class="ai-preview-actions"><button class="primary-button" type="button" data-route="learn" data-i18n="readLibrary">Read the health library</button><button class="outline-button" type="button" data-action="ai-safety">See safety principles</button></div>
+          </div>
+          <div class="ai-principles">
+            <article class="card"><span class="principle-icon">◇</span><h3 data-i18n="aiPrincipleOne">Education, not diagnosis</h3><p data-i18n="aiPrincipleOneText">Explain general health topics; never diagnose a disease or prescribe medicines.</p></article>
+            <article class="card"><span class="principle-icon">♡</span><h3 data-i18n="aiPrincipleTwo">Consent before sharing</h3><p data-i18n="aiPrincipleTwoText">A future integration must clearly explain what information is sent and ask permission first.</p></article>
+            <article class="card"><span class="principle-icon">!</span><h3 data-i18n="aiPrincipleThree">Urgent symptoms come first</h3><p data-i18n="aiPrincipleThreeText">Potential emergency symptoms should lead to urgent-care guidance, not a long chat.</p></article>
+          </div>
+        </section>
+
+        <section class="page" id="page-profile" data-page="profile">
+          <div class="page-intro">
+            <span class="eyebrow" data-i18n="privacyEyebrow">YOUR CHOICES MATTER</span>
+            <h1 data-i18n="profileTitle">Profile & privacy</h1>
+            <p data-i18n="profileIntro">Manage this browser preview and understand where your information is stored.</p>
+          </div>
+          <div class="profile-layout">
+            <article class="card profile-card">
+              <div class="profile-avatar">N</div><div><span class="eyebrow" data-i18n="previewProfile">PREVIEW PROFILE</span><h2 data-i18n="guestProfile">Your private space</h2><p data-i18n="guestProfileText">No account is signed in. This is a local browser preview.</p></div>
+              <div class="profile-setting"><div><strong data-i18n="languageSetting">Language</strong><small data-i18n="languageSettingText">Choose the language for the interface.</small></div><button class="outline-button small-button" type="button" id="profile-language-toggle">বাংলা</button></div>
+              <div class="profile-setting"><div><strong data-i18n="discreetSetting">Discreet mode</strong><small data-i18n="discreetSettingText">Blur cycle and symptom details on this screen.</small></div><button class="toggle-switch" id="profile-discreet-toggle" type="button" role="switch" aria-checked="false" aria-label="Toggle discreet mode"><span></span></button></div>
+            </article>
+            <article class="card privacy-card">
+              <span class="eyebrow" data-i18n="privacyAtAGlance">PRIVACY AT A GLANCE</span><h2 data-i18n="localStorageTitle">Stored in this browser</h2>
+              <ul class="privacy-list"><li><span>✓</span><span data-i18n="privacyListOne">Period, symptom and wellbeing entries use this browser's local storage.</span></li><li><span>✓</span><span data-i18n="privacyListTwo">This demo does not send entries to Firebase, Gemini or another server.</span></li><li><span>✓</span><span data-i18n="privacyListThree">There is no sign-in, analytics tracker or advertising script in this demo.</span></li></ul>
+              <p class="privacy-caution" data-i18n="privacyCaution">This is not encrypted storage or a secure medical record. Avoid entering sensitive information on a shared device. Browser data may be lost if you clear site data.</p>
+            </article>
+          </div>
+          <article class="card data-tools-card">
+            <div><span class="eyebrow" data-i18n="yourData">YOUR DATA</span><h2 data-i18n="dataControlsTitle">Export or clear your entries</h2><p data-i18n="dataControlsText">Keep a copy of your browser entries or remove them from this device.</p></div>
+            <div class="data-actions"><button class="outline-button" type="button" data-action="export-data">↓ <span data-i18n="exportData">Export my data</span></button><button class="danger-button" type="button" data-action="reset-data">× <span data-i18n="clearData">Clear all local data</span></button></div>
+          </article>
+          <div class="about-strip"><span class="brand-mark small-brand-mark">♡</span><div><strong>NariBondhu</strong><p data-i18n="aboutTagline">Understand your body. Recognise your needs. Reach the right care.</p><small>Web preview · v1.0 · No AI tokens required</small></div></div>
+        </section>
+
+        <footer class="app-footer"><span>© <span id="footer-year">2026</span> NariBondhu</span><span data-i18n="footerDisclaimer">Educational demo only · Not a medical service</span><a href="#profile" data-route="profile" data-i18n="footerPrivacy">Privacy & data</a></footer>
+      </main>
+    </div>
+  </div>
+
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    <a href="#home" data-route="home" class="is-active"><span>⌂</span><small data-i18n="navHome">Home</small></a>
+    <a href="#tracker" data-route="tracker"><span>◷</span><small data-i18n="navHealth">My Health</small></a>
+    <a href="#learn" data-route="learn"><span>▤</span><small data-i18n="navLearn">Learn</small></a>
+    <a href="#bondhuhelp" data-route="bondhuhelp"><span>✚</span><small data-i18n="navHelp">Care</small></a>
+    <a href="#profile" data-route="profile"><span>◉</span><small data-i18n="navProfile">Profile</small></a>
+  </nav>
+
+  <dialog class="app-dialog" id="app-dialog" aria-labelledby="dialog-title">
+    <div class="dialog-shell">
+      <div class="dialog-header"><div><span class="eyebrow" id="dialog-eyebrow">NARIBONDHU</span><h2 id="dialog-title">Add an entry</h2></div><button class="icon-button" type="button" data-action="close-dialog" aria-label="Close dialog">×</button></div>
+      <div id="dialog-content"></div>
+    </div>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
