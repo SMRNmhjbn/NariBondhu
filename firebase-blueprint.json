@@ -1,0 +1,233 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Adult user profile, language preference, health interests, and explicit privacy consent settings.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Authenticated Firebase UID" },
+        "displayName": { "type": "string", "description": "User display name or nickname" },
+        "preferredLanguage": { "type": "string", "enum": ["EN", "BN"], "description": "UI language (English or Bangla)" },
+        "city": { "type": "string", "description": "Preferred Bangladesh city for BondhuHelp" },
+        "ageConfirmed18Plus": { "type": "boolean", "description": "Adult pilot eligibility confirmation" },
+        "healthInterests": { "type": "array", "description": "Selected health focus areas" },
+        "discreetMode": { "type": "boolean", "description": "Masks sensitive cycle/intimate titles on dashboard" },
+        "onboardingCompleted": { "type": "boolean", "description": "Whether initial setup finished" },
+        "remindersEnabled": { "type": "boolean", "description": "Opt-in discreet reminder setting" },
+        "aiConsentGranted": { "type": "boolean", "description": "Explicit consent for NariBondhu AI educational queries" },
+        "cloudSyncConsentGranted": { "type": "boolean", "description": "Explicit consent for encrypted cloud record storage" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp on creation" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp on update" }
+      },
+      "required": [
+        "userId",
+        "displayName",
+        "preferredLanguage",
+        "ageConfirmed18Plus",
+        "healthInterests",
+        "discreetMode",
+        "onboardingCompleted",
+        "remindersEnabled",
+        "aiConsentGranted",
+        "cloudSyncConsentGranted",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "MenstrualPeriod": {
+      "title": "MenstrualPeriod",
+      "description": "Recorded menstrual period or spotting entry for deterministic cycle tracking.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "startDateEpochDay": { "type": "integer", "description": "LocalDate epoch day of period/spotting start" },
+        "endDateEpochDay": { "type": "integer", "description": "Optional LocalDate epoch day of end" },
+        "flowIntensity": { "type": "string", "enum": ["SPOTTING", "LIGHT", "MEDIUM", "HEAVY"] },
+        "spottingOnly": { "type": "boolean" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "userId",
+        "startDateEpochDay",
+        "flowIntensity",
+        "spottingOnly",
+        "notes",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "SymptomEntry": {
+      "title": "SymptomEntry",
+      "description": "Daily symptom or intimate health observation entry.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "dateEpochDay": { "type": "integer" },
+        "category": { "type": "string", "enum": ["MENSTRUAL", "PCOS", "PMS", "INTIMATE", "GENERAL"] },
+        "symptomType": { "type": "string" },
+        "severity": { "type": "string", "enum": ["MILD", "MODERATE", "SEVERE"] },
+        "durationText": { "type": "string" },
+        "frequencyText": { "type": "string" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "userId",
+        "dateEpochDay",
+        "category",
+        "symptomType",
+        "severity",
+        "durationText",
+        "frequencyText",
+        "notes",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "WellnessLog": {
+      "title": "WellnessLog",
+      "description": "Personal sleep, mood, stress, energy, nutrition, and hydration awareness entry.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "dateEpochDay": { "type": "integer" },
+        "sleepHours": { "type": "number" },
+        "mood": { "type": "string", "enum": ["CALM", "HAPPY", "LOW", "ANXIOUS", "IRRITABLE", "TIRED"] },
+        "stressLevel": { "type": "integer" },
+        "energyLevel": { "type": "integer" },
+        "activityMinutes": { "type": "integer" },
+        "hydrationGlasses": { "type": "integer" },
+        "nutritionNotes": { "type": "string" },
+        "wellnessGoal": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "userId",
+        "dateEpochDay",
+        "sleepHours",
+        "mood",
+        "stressLevel",
+        "energyLevel",
+        "activityMinutes",
+        "hydrationGlasses",
+        "nutritionNotes",
+        "wellnessGoal",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "HealthRecord": {
+      "title": "HealthRecord",
+      "description": "Personal health record including diagnoses, medications, allergies, lab/ultrasound reports, and consultation notes.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "recordType": { "type": "string", "enum": ["DIAGNOSIS", "MEDICATION", "ALLERGY", "LAB_REPORT", "ULTRASOUND", "CONSULTATION", "NOTE"] },
+        "title": { "type": "string" },
+        "dateText": { "type": "string" },
+        "details": { "type": "string" },
+        "verifiedByUser": { "type": "boolean" },
+        "sharedWithDoctorIds": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "userId",
+        "recordType",
+        "title",
+        "dateText",
+        "details",
+        "verifiedByUser",
+        "sharedWithDoctorIds",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "AppointmentBooking": {
+      "title": "AppointmentBooking",
+      "description": "BondhuHelp online or in-person gynaecologist appointment booking.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "doctorId": { "type": "string" },
+        "doctorName": { "type": "string" },
+        "specialty": { "type": "string" },
+        "clinicName": { "type": "string" },
+        "city": { "type": "string" },
+        "consultationType": { "type": "string", "enum": ["ONLINE", "IN_PERSON"] },
+        "slotLabel": { "type": "string" },
+        "feeBdt": { "type": "integer" },
+        "status": { "type": "string", "enum": ["CONFIRMED", "RESCHEDULE_REQUESTED", "CANCELLED", "COMPLETED"] },
+        "sharedSummaryGranted": { "type": "boolean" },
+        "sharedRecordCount": { "type": "integer" },
+        "notesForDoctor": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "userId",
+        "doctorId",
+        "doctorName",
+        "specialty",
+        "clinicName",
+        "city",
+        "consultationType",
+        "slotLabel",
+        "feeBdt",
+        "status",
+        "sharedSummaryGranted",
+        "sharedRecordCount",
+        "notesForDoctor",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ConsentLog": {
+      "title": "ConsentLog",
+      "description": "Timestamped audit record of explicit user consent grants and withdrawals.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "consentType": { "type": "string", "enum": ["PRIVACY_POLICY", "AI_DATA_PROCESSING", "DOCTOR_RECORD_SHARING", "REMINDERS", "DATA_EXPORT"] },
+        "granted": { "type": "boolean" },
+        "summary": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "consentType", "granted", "summary", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User profile and privacy consent preferences owned strictly by userId."
+    },
+    "/users/{userId}/menstrual_periods/{periodId}": {
+      "schema": { "$ref": "#/entities/MenstrualPeriod" },
+      "description": "User menstrual period and spotting log entries."
+    },
+    "/users/{userId}/symptoms/{symptomId}": {
+      "schema": { "$ref": "#/entities/SymptomEntry" },
+      "description": "User menstrual, PCOS, PMS, and intimate symptom diary entries."
+    },
+    "/users/{userId}/wellness_logs/{logId}": {
+      "schema": { "$ref": "#/entities/WellnessLog" },
+      "description": "User sleep, mood, stress, energy, hydration, and nutrition logs."
+    },
+    "/users/{userId}/health_records/{recordId}": {
+      "schema": { "$ref": "#/entities/HealthRecord" },
+      "description": "User personal health records and explicit doctor sharing authorizations."
+    },
+    "/users/{userId}/bookings/{bookingId}": {
+      "schema": { "$ref": "#/entities/AppointmentBooking" },
+      "description": "User BondhuHelp doctor consultation bookings."
+    },
+    "/users/{userId}/consent_logs/{logId}": {
+      "schema": { "$ref": "#/entities/ConsentLog" },
+      "description": "User privacy consent grant/withdrawal audit trail."
+    }
+  }
+}

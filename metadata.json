@@ -1,0 +1,6 @@
+{
+  "name": "NariBondhu",
+  "description": "Science-led, AI-assisted women's private healthcare and wellness platform for Bangladesh featuring menstrual tracking, PCOS & PMS support, NariBondhu AI, personal health records, and BondhuHelp doctor discovery.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

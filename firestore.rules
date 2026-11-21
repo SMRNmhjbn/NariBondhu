@@ -1,0 +1,315 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidUserProfile(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 80 &&
+             data.preferredLanguage in ['EN', 'BN'] &&
+             (!('city' in data) || (data.city is string && data.city.size() <= 50)) &&
+             data.ageConfirmed18Plus is bool &&
+             data.healthInterests is list && data.healthInterests.size() <= 10 &&
+             (data.healthInterests.size() == 0 || data.healthInterests[0] is string) &&
+             data.discreetMode is bool &&
+             data.onboardingCompleted is bool &&
+             data.remindersEnabled is bool &&
+             data.aiConsentGranted is bool &&
+             data.cloudSyncConsentGranted is bool &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidMenstrualPeriod(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.startDateEpochDay is int && data.startDateEpochDay >= 0 && data.startDateEpochDay <= 100000 &&
+             (!('endDateEpochDay' in data) || (data.endDateEpochDay is int && data.endDateEpochDay >= data.startDateEpochDay && data.endDateEpochDay <= 100000)) &&
+             data.flowIntensity in ['SPOTTING', 'LIGHT', 'MEDIUM', 'HEAVY'] &&
+             data.spottingOnly is bool &&
+             data.notes is string && data.notes.size() <= 500 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidSymptomEntry(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.dateEpochDay is int && data.dateEpochDay >= 0 && data.dateEpochDay <= 100000 &&
+             data.category in ['MENSTRUAL', 'PCOS', 'PMS', 'INTIMATE', 'GENERAL'] &&
+             data.symptomType is string && data.symptomType.size() >= 1 && data.symptomType.size() <= 60 &&
+             data.severity in ['MILD', 'MODERATE', 'SEVERE'] &&
+             data.durationText is string && data.durationText.size() <= 60 &&
+             data.frequencyText is string && data.frequencyText.size() <= 60 &&
+             data.notes is string && data.notes.size() <= 500 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidWellnessLog(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.dateEpochDay is int && data.dateEpochDay >= 0 && data.dateEpochDay <= 100000 &&
+             (data.sleepHours is number) && data.sleepHours >= 0.0 && data.sleepHours <= 24.0 &&
+             data.mood in ['CALM', 'HAPPY', 'LOW', 'ANXIOUS', 'IRRITABLE', 'TIRED'] &&
+             data.stressLevel is int && data.stressLevel >= 1 && data.stressLevel <= 5 &&
+             data.energyLevel is int && data.energyLevel >= 1 && data.energyLevel <= 5 &&
+             data.activityMinutes is int && data.activityMinutes >= 0 && data.activityMinutes <= 600 &&
+             data.hydrationGlasses is int && data.hydrationGlasses >= 0 && data.hydrationGlasses <= 30 &&
+             data.nutritionNotes is string && data.nutritionNotes.size() <= 300 &&
+             data.wellnessGoal is string && data.wellnessGoal.size() <= 200 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidHealthRecord(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.recordType in ['DIAGNOSIS', 'MEDICATION', 'ALLERGY', 'LAB_REPORT', 'ULTRASOUND', 'CONSULTATION', 'NOTE'] &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 120 &&
+             data.dateText is string && data.dateText.size() <= 40 &&
+             data.details is string && data.details.size() <= 1500 &&
+             data.verifiedByUser is bool &&
+             data.sharedWithDoctorIds is list && data.sharedWithDoctorIds.size() <= 20 &&
+             (data.sharedWithDoctorIds.size() == 0 || data.sharedWithDoctorIds[0] is string) &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidBooking(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.doctorId is string && data.doctorId.size() >= 1 && data.doctorId.size() <= 64 &&
+             data.doctorName is string && data.doctorName.size() >= 1 && data.doctorName.size() <= 100 &&
+             data.specialty is string && data.specialty.size() >= 1 && data.specialty.size() <= 80 &&
+             data.clinicName is string && data.clinicName.size() >= 1 && data.clinicName.size() <= 120 &&
+             data.city is string && data.city.size() >= 1 && data.city.size() <= 50 &&
+             data.consultationType in ['ONLINE', 'IN_PERSON'] &&
+             data.slotLabel is string && data.slotLabel.size() >= 1 && data.slotLabel.size() <= 80 &&
+             data.feeBdt is int && data.feeBdt >= 0 && data.feeBdt <= 50000 &&
+             data.status in ['CONFIRMED', 'RESCHEDULE_REQUESTED', 'CANCELLED', 'COMPLETED'] &&
+             data.sharedSummaryGranted is bool &&
+             data.sharedRecordCount is int && data.sharedRecordCount >= 0 && data.sharedRecordCount <= 100 &&
+             data.notesForDoctor is string && data.notesForDoctor.size() <= 500 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidConsentLog(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.consentType in ['PRIVACY_POLICY', 'AI_DATA_PROCESSING', 'DOCTOR_RECORD_SHARING', 'REMINDERS', 'DATA_EXPORT'] &&
+             data.granted is bool &&
+             data.summary is string && data.summary.size() >= 1 && data.summary.size() <= 200 &&
+             data.createdAt is timestamp && data.createdAt <= request.time;
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId) && isValidId(userId);
+      allow create: if isOwner(userId) && isValidId(userId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'displayName', 'preferredLanguage', 'ageConfirmed18Plus',
+                         'healthInterests', 'discreetMode', 'onboardingCompleted',
+                         'remindersEnabled', 'aiConsentGranted', 'cloudSyncConsentGranted',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'displayName', 'preferredLanguage', 'city', 'ageConfirmed18Plus',
+                         'healthInterests', 'discreetMode', 'onboardingCompleted',
+                         'remindersEnabled', 'aiConsentGranted', 'cloudSyncConsentGranted',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidUserProfile(incoming(), userId);
+
+      allow update: if isOwner(userId) && isValidId(userId) &&
+                       isValidUserProfile(incoming(), userId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'displayName', 'preferredLanguage', 'city', 'ageConfirmed18Plus',
+                         'healthInterests', 'discreetMode', 'onboardingCompleted',
+                         'remindersEnabled', 'aiConsentGranted', 'cloudSyncConsentGranted',
+                         'updatedAt'
+                       ]);
+
+      allow delete: if isOwner(userId) && isValidId(userId);
+
+      match /menstrual_periods/{periodId} {
+        allow get: if isOwner(userId) && isValidId(periodId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(periodId) &&
+                         incoming().keys().hasAll([
+                           'userId', 'startDateEpochDay', 'flowIntensity', 'spottingOnly',
+                           'notes', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'startDateEpochDay', 'endDateEpochDay', 'flowIntensity',
+                           'spottingOnly', 'notes', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidMenstrualPeriod(incoming(), userId);
+
+        allow update: if isOwner(userId) && isValidId(periodId) &&
+                         isValidMenstrualPeriod(incoming(), userId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'startDateEpochDay', 'endDateEpochDay', 'flowIntensity',
+                           'spottingOnly', 'notes', 'updatedAt'
+                         ]);
+
+        allow delete: if isOwner(userId) && isValidId(periodId);
+      }
+
+      match /symptoms/{symptomId} {
+        allow get: if isOwner(userId) && isValidId(symptomId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(symptomId) &&
+                         incoming().keys().hasAll([
+                           'userId', 'dateEpochDay', 'category', 'symptomType', 'severity',
+                           'durationText', 'frequencyText', 'notes', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'dateEpochDay', 'category', 'symptomType', 'severity',
+                           'durationText', 'frequencyText', 'notes', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidSymptomEntry(incoming(), userId);
+
+        allow update: if isOwner(userId) && isValidId(symptomId) &&
+                         isValidSymptomEntry(incoming(), userId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'dateEpochDay', 'category', 'symptomType', 'severity',
+                           'durationText', 'frequencyText', 'notes', 'updatedAt'
+                         ]);
+
+        allow delete: if isOwner(userId) && isValidId(symptomId);
+      }
+
+      match /wellness_logs/{logId} {
+        allow get: if isOwner(userId) && isValidId(logId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(logId) &&
+                         incoming().keys().hasAll([
+                           'userId', 'dateEpochDay', 'sleepHours', 'mood', 'stressLevel',
+                           'energyLevel', 'activityMinutes', 'hydrationGlasses',
+                           'nutritionNotes', 'wellnessGoal', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'dateEpochDay', 'sleepHours', 'mood', 'stressLevel',
+                           'energyLevel', 'activityMinutes', 'hydrationGlasses',
+                           'nutritionNotes', 'wellnessGoal', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidWellnessLog(incoming(), userId);
+
+        allow update: if isOwner(userId) && isValidId(logId) &&
+                         isValidWellnessLog(incoming(), userId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'dateEpochDay', 'sleepHours', 'mood', 'stressLevel',
+                           'energyLevel', 'activityMinutes', 'hydrationGlasses',
+                           'nutritionNotes', 'wellnessGoal', 'updatedAt'
+                         ]);
+
+        allow delete: if isOwner(userId) && isValidId(logId);
+      }
+
+      match /health_records/{recordId} {
+        allow get: if isOwner(userId) && isValidId(recordId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(recordId) &&
+                         incoming().keys().hasAll([
+                           'userId', 'recordType', 'title', 'dateText', 'details',
+                           'verifiedByUser', 'sharedWithDoctorIds', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'recordType', 'title', 'dateText', 'details',
+                           'verifiedByUser', 'sharedWithDoctorIds', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidHealthRecord(incoming(), userId);
+
+        allow update: if isOwner(userId) && isValidId(recordId) &&
+                         isValidHealthRecord(incoming(), userId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'recordType', 'title', 'dateText', 'details',
+                           'verifiedByUser', 'sharedWithDoctorIds', 'updatedAt'
+                         ]);
+
+        allow delete: if isOwner(userId) && isValidId(recordId);
+      }
+
+      match /bookings/{bookingId} {
+        allow get: if isOwner(userId) && isValidId(bookingId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(bookingId) &&
+                         incoming().keys().hasAll([
+                           'userId', 'doctorId', 'doctorName', 'specialty', 'clinicName',
+                           'city', 'consultationType', 'slotLabel', 'feeBdt', 'status',
+                           'sharedSummaryGranted', 'sharedRecordCount', 'notesForDoctor',
+                           'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'doctorId', 'doctorName', 'specialty', 'clinicName',
+                           'city', 'consultationType', 'slotLabel', 'feeBdt', 'status',
+                           'sharedSummaryGranted', 'sharedRecordCount', 'notesForDoctor',
+                           'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().status == 'CONFIRMED' &&
+                         isValidBooking(incoming(), userId);
+
+        // Action-based update with terminal state locking (cannot mutate CANCELLED or COMPLETED bookings)
+        allow update: if isOwner(userId) && isValidId(bookingId) &&
+                         isValidBooking(incoming(), userId) &&
+                         existing().status in ['CONFIRMED', 'RESCHEDULE_REQUESTED'] &&
+                         incoming().userId == existing().userId &&
+                         incoming().doctorId == existing().doctorId &&
+                         incoming().createdAt == existing().createdAt &&
+                         (
+                           // Action: Cancel or request reschedule
+                           (incoming().status in ['CANCELLED', 'RESCHEDULE_REQUESTED'] &&
+                            incoming().diff(existing()).affectedKeys().hasOnly(['status', 'slotLabel', 'updatedAt'])) ||
+                           // Action: Update sharing consent or notes before consultation
+                           (incoming().status == existing().status &&
+                            incoming().diff(existing()).affectedKeys().hasOnly(['sharedSummaryGranted', 'sharedRecordCount', 'notesForDoctor', 'updatedAt']))
+                         );
+
+        allow delete: if isOwner(userId) && isValidId(bookingId);
+      }
+
+      match /consent_logs/{logId} {
+        allow get: if isOwner(userId) && isValidId(logId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(logId) &&
+                         incoming().keys().hasAll([
+                           'userId', 'consentType', 'granted', 'summary', 'createdAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'consentType', 'granted', 'summary', 'createdAt'
+                         ]) &&
+                         isValidConsentLog(incoming(), userId);
+        allow update: if false;
+        allow delete: if isOwner(userId) && isValidId(logId);
+      }
+    }
+  }
+}
