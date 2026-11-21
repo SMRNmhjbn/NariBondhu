@@ -74,11 +74,61 @@ enum class HealthRecordType(val enLabel: String, val bnLabel: String) {
     LAB_REPORT("Lab Report", "ল্যাব রিপোর্ট"),
     ULTRASOUND("Ultrasound", "আল্ট্রাসাউন্ড"),
     CONSULTATION("Previous Consultation", "পূর্বের পরামর্শ"),
+    E_PRESCRIPTION("E-Prescription", "ই-প্রেসক্রিপশন"),
     NOTE("Personal Note", "ব্যক্তিগত নোট");
 
     companion object {
         fun fromName(raw: String?): HealthRecordType =
             entries.firstOrNull { it.name == raw } ?: NOTE
+    }
+}
+
+enum class ServiceTier(
+    val code: String,
+    val monthlyPriceBdt: Int,
+    val enName: String,
+    val bnName: String,
+    val enPriceLabel: String,
+    val bnPriceLabel: String,
+) {
+    FREE(
+        code = "FREE",
+        monthlyPriceBdt = 0,
+        enName = "Free Plan",
+        bnName = "ফ্রি প্ল্যান",
+        enPriceLabel = "BDT 0 / month",
+        bnPriceLabel = "৳০ / মাস",
+    ),
+    TIER_1(
+        code = "TIER_1",
+        monthlyPriceBdt = 200,
+        enName = "Tier 1 • AI & PCOS Care",
+        bnName = "টিয়ার ১ • AI ও PCOS কেয়ার",
+        enPriceLabel = "BDT 200 / month",
+        bnPriceLabel = "৳২০০ / মাস",
+    ),
+    TIER_2(
+        code = "TIER_2",
+        monthlyPriceBdt = 450,
+        enName = "Tier 2 • Consult Care",
+        bnName = "টিয়ার ২ • কনসালটেশন কেয়ার",
+        enPriceLabel = "BDT 450 / month",
+        bnPriceLabel = "৳৪৫০ / মাস",
+    ),
+    TIER_3(
+        code = "TIER_3",
+        monthlyPriceBdt = 900,
+        enName = "Tier 3 • Complete Care",
+        bnName = "টিয়ার ৩ • সম্পূর্ণ কেয়ার",
+        enPriceLabel = "BDT 900 / month",
+        bnPriceLabel = "৳৯০০ / মাস",
+    );
+
+    fun isAtLeast(other: ServiceTier): Boolean = this.ordinal >= other.ordinal
+
+    companion object {
+        fun fromCode(raw: String?): ServiceTier =
+            entries.firstOrNull { it.code == raw } ?: FREE
     }
 }
 
@@ -132,6 +182,10 @@ data class UserProfile(
     val remindersEnabled: Boolean = false,
     val aiConsentGranted: Boolean = false,
     val cloudSyncConsentGranted: Boolean = false,
+    val serviceTier: String = ServiceTier.FREE.code,
+    val weeklyAiTokensRemaining: Long = 10L,
+    val weeklyTokenResetEpochDay: Long = 0L,
+    val preferredConsultMode: String = ConsultationType.ONLINE.name,
     @ServerTimestamp val createdAt: Timestamp? = null,
     @ServerTimestamp val updatedAt: Timestamp? = null,
 ) {
@@ -150,6 +204,10 @@ data class UserProfile(
             "remindersEnabled" to remindersEnabled,
             "aiConsentGranted" to aiConsentGranted,
             "cloudSyncConsentGranted" to cloudSyncConsentGranted,
+            "serviceTier" to ServiceTier.fromCode(serviceTier).code,
+            "weeklyAiTokensRemaining" to weeklyAiTokensRemaining.coerceIn(0L, 10L),
+            "weeklyTokenResetEpochDay" to weeklyTokenResetEpochDay.coerceIn(0L, 100000L),
+            "preferredConsultMode" to ConsultationType.fromName(preferredConsultMode).name,
             "createdAt" to FieldValue.serverTimestamp(),
             "updatedAt" to FieldValue.serverTimestamp(),
         )

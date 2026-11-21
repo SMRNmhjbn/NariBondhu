@@ -78,14 +78,17 @@ import androidx.compose.ui.unit.dp
 import com.example.core.AppStrings
 import com.example.core.CycleStatistics
 import com.example.core.EpochDateUtil
+import com.example.core.TierEntitlements
 import com.example.core.rememberTtsSpeaker
 import com.example.data.AppLanguage
+import com.example.data.AppointmentBooking
 import com.example.data.ClinicalContentCatalog
 import com.example.data.EducationalArticle
 import com.example.data.FlowIntensity
 import com.example.data.HealthRecord
 import com.example.data.HealthRecordType
 import com.example.data.MenstrualPeriod
+import com.example.data.ServiceTier
 import com.example.data.SymptomCategory
 import com.example.data.SymptomEntry
 import com.example.data.SymptomSeverity
@@ -94,6 +97,7 @@ import com.example.data.WellnessMood
 import com.example.ui.ExtractionState
 import com.example.ui.SummaryPrepState
 import com.example.ui.home.HealthSubTab
+import com.example.ui.profile.TierLockedFeatureCard
 import com.example.ui.theme.DeepPlum
 import com.example.ui.theme.DeepPlumDark
 import com.example.ui.theme.InkPrimary
@@ -112,18 +116,23 @@ fun MyHealthScreen(
     onSelectTab: (HealthSubTab) -> Unit,
     language: AppLanguage,
     discreetMode: Boolean = false,
+    entitlements: TierEntitlements,
+    healthInterests: List<String>,
     periods: List<MenstrualPeriod>,
     cycleStats: CycleStatistics,
     symptoms: List<SymptomEntry>,
     wellnessLogs: List<WellnessLog>,
     healthRecords: List<HealthRecord>,
+    bookings: List<AppointmentBooking>,
     extractionState: ExtractionState,
     summaryPrepState: SummaryPrepState,
     aiConsentGranted: Boolean,
+    onOpenPlans: () -> Unit,
     onSavePeriod: (MenstrualPeriod) -> Unit,
     onOpenPeriodDialog: (MenstrualPeriod?, Long) -> Unit,
     onDeletePeriod: (String) -> Unit,
     onOpenSymptomDialog: (SymptomCategory) -> Unit,
+    onSavePcosCheckIn: (List<SymptomEntry>, (Result<Int>) -> Unit) -> Unit,
     onDeleteSymptom: (String) -> Unit,
     onOpenWellnessDialog: () -> Unit,
     onOpenRecordDialog: () -> Unit,
@@ -133,6 +142,7 @@ fun MyHealthScreen(
     onResetExtraction: () -> Unit,
     onGenerateAppointmentSummary: () -> Unit,
     onBuildPlainSummaryText: () -> String,
+    onSaveClinicianEPrescription: (AppointmentBooking, String, String, String, String) -> Unit,
     onOpenBondhuHelp: () -> Unit,
     onAskAiTopic: (String) -> Unit,
 ) {
@@ -188,6 +198,7 @@ fun MyHealthScreen(
                 HealthSubTab.CYCLE to (if (isBn) "চক্র ও লক্ষণ" else "Cycle & Symptoms"),
                 HealthSubTab.PCOS_PMS to (if (isBn) "পিসিওএস ও পিএমএস" else "PCOS & PMS"),
                 HealthSubTab.WELLNESS to (if (isBn) "সুস্থতা" else "Wellness"),
+                HealthSubTab.LIFESTYLE_RX to (if (isBn) "জীবনযাত্রা ও Rx" else "Lifestyle & Rx"),
                 HealthSubTab.LIBRARY to (if (isBn) "স্বাস্থ্য পাঠাগার" else "Health Library"),
                 HealthSubTab.RECORDS to (if (isBn) "স্বাস্থ্য রেকর্ড" else "Health Records"),
             )
@@ -205,9 +216,11 @@ fun MyHealthScreen(
             HealthSubTab.CYCLE -> CycleAndSymptomTab(
                 language = language,
                 discreetMode = discreetMode,
+                hasCycleAnalysis = entitlements.hasCycleAnalysis,
                 periods = periods,
                 cycleStats = cycleStats,
                 symptoms = symptoms,
+                onOpenPlans = onOpenPlans,
                 onSavePeriod = onSavePeriod,
                 onDeletePeriod = onDeletePeriod,
                 onOpenSymptomDialog = onOpenSymptomDialog,
@@ -215,10 +228,14 @@ fun MyHealthScreen(
             )
             HealthSubTab.PCOS_PMS -> PcosAndPmsTab(
                 language = language,
+                hasPersonalisedPcosPmsCare = entitlements.hasPersonalisedPcosPmsCare,
                 cycleStats = cycleStats,
                 symptoms = symptoms,
                 summaryPrepState = summaryPrepState,
                 aiConsentGranted = aiConsentGranted,
+                onOpenPlans = onOpenPlans,
+                onSavePcosCheckIn = onSavePcosCheckIn,
+                onDeleteSymptom = onDeleteSymptom,
                 onLogPcosOrPmsSymptom = { cat -> onOpenSymptomDialog(cat) },
                 onGenerateSummary = onGenerateAppointmentSummary,
                 onOpenBondhuHelp = onOpenBondhuHelp,
@@ -228,6 +245,19 @@ fun MyHealthScreen(
                 language = language,
                 logs = wellnessLogs,
                 onAddLog = onOpenWellnessDialog,
+            )
+            HealthSubTab.LIFESTYLE_RX -> LifestyleAndRxTab(
+                language = language,
+                entitlements = entitlements,
+                healthInterests = healthInterests,
+                symptoms = symptoms,
+                healthRecords = healthRecords,
+                bookings = bookings,
+                onOpenPlans = onOpenPlans,
+                onOpenWellnessDialog = onOpenWellnessDialog,
+                onOpenBondhuHelp = onOpenBondhuHelp,
+                onSaveClinicianEPrescription = onSaveClinicianEPrescription,
+                onDeleteRecord = onDeleteRecord,
             )
             HealthSubTab.LIBRARY -> LibraryTab(
                 language = language,
@@ -251,9 +281,11 @@ fun MyHealthScreen(
 private fun CycleAndSymptomTab(
     language: AppLanguage,
     discreetMode: Boolean,
+    hasCycleAnalysis: Boolean,
     periods: List<MenstrualPeriod>,
     cycleStats: CycleStatistics,
     symptoms: List<SymptomEntry>,
+    onOpenPlans: () -> Unit,
     onSavePeriod: (MenstrualPeriod) -> Unit,
     onDeletePeriod: (String) -> Unit,
     onOpenSymptomDialog: (SymptomCategory) -> Unit,
@@ -329,49 +361,77 @@ private fun CycleAndSymptomTab(
             }
         }
 
-        // Deterministic Cycle Statistics Card
+        // Cycle Statistics & Analysis Card (Tier 1+)
         item {
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(18.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(18.dp)),
-            ) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        if (isBn) "চক্রের পরিসংখ্যান ও অনিশ্চয়তা তথ্য" else "Cycle Statistics & Prediction Uncertainty",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                    if (cycleStats.individualCycleLengths.isNotEmpty()) {
+            if (hasCycleAnalysis) {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    shape = RoundedCornerShape(18.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(18.dp)),
+                ) {
+                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(
-                            text = if (isBn) {
-                                "পূর্বের চক্রসমূহ (দিন): ${cycleStats.individualCycleLengths.joinToString(", ")}"
-                            } else {
-                                "Individual cycle lengths: ${cycleStats.individualCycleLengths.joinToString(", ")} days"
-                            },
-                            style = MaterialTheme.typography.bodyMedium,
+                            if (isBn) "চক্রের পরিসংখ্যান ও অনিশ্চয়তা তথ্য" else "Cycle Statistics & Prediction Uncertainty",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
                         )
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                        ) {
-                            StatPill(if (isBn) "গড়" else "Average", "${cycleStats.averageLengthDays?.roundToInt()}d")
-                            StatPill(if (isBn) "মধ্যক" else "Median", "${cycleStats.medianLengthDays?.roundToInt()}d")
-                            StatPill(if (isBn) "সীমা" else "Min–Max", "${cycleStats.minLengthDays}–${cycleStats.maxLengthDays}d")
-                            StatPill(if (isBn) "পার্থক্য" else "Variability", "±${cycleStats.variabilityRangeDays}d")
+                        if (cycleStats.individualCycleLengths.isNotEmpty()) {
+                            Text(
+                                text = if (isBn) {
+                                    "পূর্বের চক্রসমূহ (দিন): ${cycleStats.individualCycleLengths.joinToString(", ")}"
+                                } else {
+                                    "Individual cycle lengths: ${cycleStats.individualCycleLengths.joinToString(", ")} days"
+                                },
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                            ) {
+                                StatPill(if (isBn) "গড়" else "Average", "${cycleStats.averageLengthDays?.roundToInt()}d")
+                                StatPill(if (isBn) "মধ্যক" else "Median", "${cycleStats.medianLengthDays?.roundToInt()}d")
+                                StatPill(if (isBn) "সীমা" else "Min–Max", "${cycleStats.minLengthDays}–${cycleStats.maxLengthDays}d")
+                                StatPill(if (isBn) "পার্থক্য" else "Variability", "±${cycleStats.variabilityRangeDays}d")
+                            }
+                        }
+                        Surface(color = Lavender, contentColor = InkPrimary, shape = RoundedCornerShape(12.dp)) {
+                            Text(
+                                text = if (isBn) cycleStats.uncertaintyNoteBn else cycleStats.uncertaintyNoteEn,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = InkPrimary,
+                                modifier = Modifier.padding(10.dp),
+                            )
                         }
                     }
-                    Surface(color = Lavender, contentColor = InkPrimary, shape = RoundedCornerShape(12.dp)) {
-                        Text(
-                            text = if (isBn) cycleStats.uncertaintyNoteBn else cycleStats.uncertaintyNoteEn,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = InkPrimary,
-                            modifier = Modifier.padding(10.dp),
-                        )
-                    }
                 }
+            } else {
+                TierLockedFeatureCard(
+                    requiredTier = ServiceTier.TIER_1,
+                    title = if (isBn) "চক্র বিশ্লেষণ ও পূর্বাভাস আনলক করুন" else "Unlock Full Cycle Analysis",
+                    description = if (isBn) {
+                        "ফ্রি প্ল্যানে মাসিক ক্যালেন্ডার ও তারিখ সংরক্ষণ সবসময় চালু আছে। গড় চক্রের দৈর্ঘ্য, পরিবর্তনশীলতা এবং পরবর্তী সম্ভাব্য তারিখ দেখতে টিয়ার ১ (৳২০০/মাস) বেছে নিন।"
+                    } else {
+                        "Your Period Calendar & logging are always free. Upgrade to Tier 1 (BDT 200/month) for full cycle variability stats, median calculations, and next-window predictions."
+                    },
+                    highlights = if (isBn) {
+                        listOf(
+                            "সর্বনিম্ন–সর্বোচ্চ চক্রের পরিসর ও পরিবর্তনশীলতা",
+                            "নারীবন্ধু AI চ্যাটবটে আনলিমিটেড টোকেন",
+                            "ব্যক্তিগত PCOS ও PMS যত্ন অন্তর্ভুক্ত",
+                        )
+                    } else {
+                        listOf(
+                            "Median length, min-max range & variability trends",
+                            "Unlimited NariBondhu AI chatbot tokens",
+                            "Personalised PCOS & PMS care included",
+                        )
+                    },
+                    language = language,
+                    onOpenPlans = onOpenPlans,
+                    testTag = "locked_cycle_analysis_card",
+                )
             }
         }
 
@@ -515,16 +575,22 @@ private fun StatPill(label: String, value: String) {
 @Composable
 private fun PcosAndPmsTab(
     language: AppLanguage,
+    hasPersonalisedPcosPmsCare: Boolean,
     cycleStats: CycleStatistics,
     symptoms: List<SymptomEntry>,
     summaryPrepState: SummaryPrepState,
     aiConsentGranted: Boolean,
+    onOpenPlans: () -> Unit,
+    onSavePcosCheckIn: (List<SymptomEntry>, (Result<Int>) -> Unit) -> Unit,
+    onDeleteSymptom: (String) -> Unit,
     onLogPcosOrPmsSymptom: (SymptomCategory) -> Unit,
     onGenerateSummary: () -> Unit,
     onOpenBondhuHelp: () -> Unit,
     onOpenArticle: (EducationalArticle) -> Unit,
 ) {
     val isBn = language == AppLanguage.BN
+    val pcosFormState = rememberDailyPcosFormState()
+    val pcosOnlySymptoms = symptoms.filter { it.category == SymptomCategory.PCOS.name }
     val pcosPmsSymptoms = symptoms.filter {
         it.category == SymptomCategory.PCOS.name || it.category == SymptomCategory.PMS.name
     }
@@ -555,135 +621,190 @@ private fun PcosAndPmsTab(
             }
         }
 
-        item {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Button(
-                    onClick = { onLogPcosOrPmsSymptom(SymptomCategory.PCOS) },
-                    modifier = Modifier.weight(1f),
-                ) {
-                    Text(if (isBn) "PCOS লক্ষণ লিখুন" else "Log PCOS Entry")
-                }
+        if (!hasPersonalisedPcosPmsCare) {
+            item {
+                TierLockedFeatureCard(
+                    requiredTier = ServiceTier.TIER_1,
+                    title = if (isBn) "ব্যক্তিগত PCOS ও PMS যত্ন আনলক করুন" else "Unlock Personalised PCOS & PMS Care",
+                    description = if (isBn) {
+                        "টিয়ার ১ (৳২০০/মাস) প্ল্যানে দৈনিক PCOS মার্কার ফর্ম (অতিরিক্ত লোম, ব্রণ, ক্লান্তি), পুনরাবৃত্ত লক্ষণ বিশ্লেষণ, ডাক্তার ভিজিট প্রস্তুতি এবং আনলিমিটেড AI টোকেন পাবেন।"
+                    } else {
+                        "Upgrade to Tier 1 (BDT 200/month) for your Daily PCOS Marker Check-In (hair growth, acne, fatigue), Recurring Pattern Recognition, Doctor Appointment Prep, and Unlimited AI Tokens."
+                    },
+                    highlights = if (isBn) {
+                        listOf(
+                            "দৈনিক PCOS লক্ষণ ফর্ম ও প্রবণতা",
+                            "পুনরাবৃত্ত প্যাটার্ন ও চক্র বিশ্লেষণ",
+                            "ডাক্তার দেখানোর প্রস্তুতি সারাংশ + আনলিমিটেড AI",
+                        )
+                    } else {
+                        listOf(
+                            "Daily PCOS Marker Form (Hair Growth, Acne, Fatigue) synced to Firestore",
+                            "Recurring symptom pattern analysis & Cycle Analysis",
+                            "Doctor Appointment Preparation & Unlimited AI Tokens",
+                        )
+                    },
+                    language = language,
+                    onOpenPlans = onOpenPlans,
+                    testTag = "locked_pcos_pms_card",
+                )
+            }
+        } else {
+            // Dedicated Daily PCOS Marker Tracking Form (Hair growth, Acne, Fatigue, etc. -> Firestore)
+            item {
+                DailyPcosTrackerCard(
+                    state = pcosFormState,
+                    existingPcosEntries = pcosOnlySymptoms,
+                    isBn = isBn,
+                    onSubmit = { entries ->
+                        pcosFormState.updateSubmitting(true)
+                        onSavePcosCheckIn(entries) { result ->
+                            pcosFormState.updateSubmitting(false)
+                            if (result.isSuccess) {
+                                pcosFormState.resetAfterSave()
+                            } else {
+                                pcosFormState.setError(
+                                    result.exceptionOrNull()?.localizedMessage
+                                        ?: if (isBn) "তথ্য সংরক্ষণ করা যায়নি, আবার চেষ্টা করুন।"
+                                        else "Could not save check-in. Please try again."
+                                )
+                            }
+                        }
+                    },
+                )
+            }
+
+            // Daily PCOS Marker Log History
+            item {
+                DailyPcosHistoryCard(
+                    pcosEntries = pcosOnlySymptoms,
+                    isBn = isBn,
+                    onDeleteSymptom = onDeleteSymptom,
+                )
+            }
+
+            item {
                 OutlinedButton(
                     onClick = { onLogPcosOrPmsSymptom(SymptomCategory.PMS) },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text(if (isBn) "PMS লক্ষণ লিখুন" else "Log PMS Entry")
+                    Text(if (isBn) "অতিরিক্ত PMS লক্ষণ লিখুন" else "Log Quick PMS Symptom")
                 }
             }
-        }
 
-        // Pattern Recognition Card
-        item {
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(18.dp),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        if (isBn) "আপনার পুনরাবৃত্ত লক্ষণের ধারা" else "Recurring Pattern Recognition",
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    if (topRecurring.isEmpty()) {
+            // Pattern Recognition Card
+            item {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    shape = RoundedCornerShape(18.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(
-                            if (isBn) "PCOS বা PMS লক্ষণ নথিভুক্ত করলে এখানে পুনরাবৃত্ত ধারা দেখা যাবে।"
-                            else "Log PCOS or PMS entries over time to see recurring patterns here.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            if (isBn) "আপনার পুনরাবৃত্ত লক্ষণের ধারা" else "Recurring Pattern Recognition",
+                            style = MaterialTheme.typography.titleMedium,
                         )
-                    } else {
-                        topRecurring.forEach { (symName, entries) ->
-                            Text("• $symName — ${entries.size}x recorded", style = MaterialTheme.typography.bodyMedium)
+                        if (topRecurring.isEmpty()) {
+                            Text(
+                                if (isBn) "PCOS বা PMS লক্ষণ নথিভুক্ত করলে এখানে পুনরাবৃত্ত ধারা দেখা যাবে।"
+                                else "Log PCOS or PMS entries over time to see recurring patterns here.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        } else {
+                            topRecurring.forEach { (symName, entries) ->
+                                Text("• $symName — ${entries.size}x recorded", style = MaterialTheme.typography.bodyMedium)
+                            }
+                        }
+                        if (cycleStats.variabilityRangeDays != null) {
+                            Text(
+                                text = if (isBn) "চক্রের পার্থক্য: ±${cycleStats.variabilityRangeDays} দিন"
+                                else "Recorded cycle variability: ±${cycleStats.variabilityRangeDays} days",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
                         }
                     }
-                    if (cycleStats.variabilityRangeDays != null) {
+                }
+            }
+
+            // Doctor Appointment Preparation Tool (PRD Section 5.1 & Automation Module H)
+            item {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    shape = RoundedCornerShape(18.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(18.dp)),
+                ) {
+                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text(
-                            text = if (isBn) "চক্রের পার্থক্য: ±${cycleStats.variabilityRangeDays} দিন"
-                            else "Recorded cycle variability: ±${cycleStats.variabilityRangeDays} days",
-                            style = MaterialTheme.typography.bodySmall,
+                            if (isBn) "ডাক্তার দেখানোর প্রস্তুতি (Appointment Prep)" else "Doctor Appointment Preparation",
+                            style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.primary,
                         )
-                    }
-                }
-            }
-        }
-
-        // Doctor Appointment Preparation Tool (PRD Section 5.1 & Automation Module H)
-        item {
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(18.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(18.dp)),
-            ) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(
-                        if (isBn) "ডাক্তার দেখানোর প্রস্তুতি (Appointment Prep)" else "Doctor Appointment Preparation",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                    Text(
-                        if (isBn) "আপনার রেকর্ড করা মাসিক ও লক্ষণগুলো ক্রমানুসারে সাজিয়ে ডাক্তারকে দেখানোর সহজ প্রশ্ন তৈরি করুন।"
-                        else "Organise your recorded cycles and symptoms into a doctor-ready chronological summary and helpful questions.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    if (aiConsentGranted) {
-                        Button(
-                            onClick = onGenerateSummary,
-                            enabled = summaryPrepState !is SummaryPrepState.Loading,
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            if (summaryPrepState is SummaryPrepState.Loading) {
-                                CircularProgressIndicator(Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
-                                Spacer(Modifier.width(8.dp))
-                            }
-                            Text(if (isBn) "সারাংশ ও প্রশ্ন তৈরি করুন" else "Prepare Chronological Summary")
-                        }
-                    } else {
                         Text(
-                            if (isBn) "প্রস্তুতি সারাংশ তৈরির জন্য প্রোফাইল থেকে NariBondhu AI সম্মতি চালু করুন।"
-                            else "Enable NariBondhu AI consent in Profile to format an AI summary, or consult a doctor directly via BondhuHelp.",
+                            if (isBn) "আপনার রেকর্ড করা মাসিক ও লক্ষণগুলো ক্রমানুসারে সাজিয়ে ডাক্তারকে দেখানোর সহজ প্রশ্ন তৈরি করুন।"
+                            else "Organise your recorded cycles and symptoms into a doctor-ready chronological summary and helpful questions.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
-                    }
+                        if (aiConsentGranted) {
+                            Button(
+                                onClick = onGenerateSummary,
+                                enabled = summaryPrepState !is SummaryPrepState.Loading,
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                if (summaryPrepState is SummaryPrepState.Loading) {
+                                    CircularProgressIndicator(Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
+                                    Spacer(Modifier.width(8.dp))
+                                }
+                                Text(if (isBn) "সারাংশ ও প্রশ্ন তৈরি করুন" else "Prepare Chronological Summary")
+                            }
+                        } else {
+                            Text(
+                                if (isBn) "প্রস্তুতি সারাংশ তৈরির জন্য প্রোফাইল থেকে NariBondhu AI সম্মতি চালু করুন।"
+                                else "Enable NariBondhu AI consent in Profile to format an AI summary, or consult a doctor directly via BondhuHelp.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
 
-                    when (summaryPrepState) {
-                        is SummaryPrepState.Ready -> {
-                            Surface(color = SafetyGreenContainer, contentColor = InkPrimary, shape = RoundedCornerShape(12.dp)) {
-                                Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    Text(summaryPrepState.summary, style = MaterialTheme.typography.bodySmall, color = InkPrimary)
-                                    if (summaryPrepState.questions.isNotEmpty()) {
-                                        Text(
-                                            if (isBn) "ডাক্তারকে জিজ্ঞাসা করার প্রশ্ন:" else "Suggested Questions for Your Doctor:",
-                                            style = MaterialTheme.typography.titleSmall,
-                                            color = SafetyGreen,
-                                        )
-                                        summaryPrepState.questions.forEach { q ->
-                                            Text("• $q", style = MaterialTheme.typography.bodySmall, color = InkPrimary)
+                        when (summaryPrepState) {
+                            is SummaryPrepState.Ready -> {
+                                Surface(color = SafetyGreenContainer, contentColor = InkPrimary, shape = RoundedCornerShape(12.dp)) {
+                                    Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                        Text(summaryPrepState.summary, style = MaterialTheme.typography.bodySmall, color = InkPrimary)
+                                        if (summaryPrepState.questions.isNotEmpty()) {
+                                            Text(
+                                                if (isBn) "ডাক্তারকে জিজ্ঞাসা করার প্রশ্ন:" else "Suggested Questions for Your Doctor:",
+                                                style = MaterialTheme.typography.titleSmall,
+                                                color = SafetyGreen,
+                                            )
+                                            summaryPrepState.questions.forEach { q ->
+                                                Text("• $q", style = MaterialTheme.typography.bodySmall, color = InkPrimary)
+                                            }
                                         }
                                     }
                                 }
                             }
+                            is SummaryPrepState.Error -> {
+                                Text(summaryPrepState.message, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                            }
+                            else -> Unit
                         }
-                        is SummaryPrepState.Error -> {
-                            Text(summaryPrepState.message, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
-                        }
-                        else -> Unit
-                    }
 
-                    OutlinedButton(onClick = onOpenBondhuHelp, modifier = Modifier.fillMaxWidth()) {
-                        Icon(Icons.Rounded.LocalHospital, contentDescription = null)
-                        Spacer(Modifier.width(8.dp))
-                        Text(if (isBn) "BondhuHelp-এ বিশেষজ্ঞ খুঁজুন" else "Find a PCOS / Gynae Specialist on BondhuHelp")
+                        OutlinedButton(onClick = onOpenBondhuHelp, modifier = Modifier.fillMaxWidth()) {
+                            Icon(Icons.Rounded.LocalHospital, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text(if (isBn) "BondhuHelp-এ বিশেষজ্ঞ খুঁজুন" else "Find a PCOS / Gynae Specialist on BondhuHelp")
+                        }
                     }
                 }
             }
         }
 
-        // Relevant PCOS & PMS Articles
+        // Relevant PCOS & PMS Articles (Always readable as educational library content)
         val pcosPmsArticles = ClinicalContentCatalog.articles.filter { it.category == "PCOS" || it.category == "PMS" }
         items(pcosPmsArticles, key = { it.articleId }) { article ->
             ArticlePreviewCard(article = article, isBn = isBn, onClick = { onOpenArticle(article) })

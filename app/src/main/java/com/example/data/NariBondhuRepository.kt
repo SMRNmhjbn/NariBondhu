@@ -242,6 +242,30 @@ class NariBondhuRepository(
         }
     }
 
+    suspend fun updateServiceTier(
+        tier: ServiceTier,
+        preferredConsultMode: ConsultationType? = null,
+    ): Result<Unit> {
+        val fields = mutableMapOf<String, Any>(
+            "serviceTier" to tier.code,
+        )
+        if (preferredConsultMode != null) {
+            fields["preferredConsultMode"] = preferredConsultMode.name
+        }
+        return updateProfileFields(fields)
+    }
+
+    suspend fun updatePreferredConsultMode(mode: ConsultationType): Result<Unit> =
+        updateProfileFields(mapOf("preferredConsultMode" to mode.name))
+
+    suspend fun syncWeeklyTokens(remaining: Long, resetEpochDay: Long): Result<Unit> =
+        updateProfileFields(
+            mapOf(
+                "weeklyAiTokensRemaining" to remaining.coerceIn(0L, 10L),
+                "weeklyTokenResetEpochDay" to resetEpochDay.coerceIn(0L, 100000L),
+            )
+        )
+
     suspend fun logConsent(consentType: ConsentType, granted: Boolean, summary: String): Result<Unit> {
         var path = "users/${auth.currentUser?.uid ?: "unauthenticated"}/consent_logs"
         return try {
@@ -309,6 +333,30 @@ class NariBondhuRepository(
             path = docRef.path
             docRef.set(entry.copy(userId = uid).toCreateMap()).await()
             Result.success(Unit)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            handleFirestoreError(e, OperationType.CREATE, path)
+            Result.failure(e)
+        }
+    }
+
+    suspend fun addSymptomsBatch(entries: List<SymptomEntry>): Result<Int> {
+        val sanitized = entries.take(15)
+        if (sanitized.isEmpty()) {
+            return Result.failure(IllegalArgumentException("Select at least one symptom marker to save."))
+        }
+        val path = "users/${auth.currentUser?.uid ?: "unauthenticated"}/symptoms"
+        return try {
+            val uid = requireUserId()
+            val colRef = db.collection("users").document(uid).collection("symptoms")
+            val batch = db.batch()
+            sanitized.forEach { entry ->
+                val docRef = colRef.document()
+                batch.set(docRef, entry.copy(userId = uid).toCreateMap())
+            }
+            batch.commit().await()
+            Result.success(sanitized.size)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -447,6 +495,8 @@ class NariBondhuRepository(
         root.put("displayName", profile?.displayName ?: "")
         root.put("city", profile?.city ?: "")
         root.put("preferredLanguage", profile?.preferredLanguage ?: "EN")
+        root.put("serviceTier", profile?.serviceTier ?: ServiceTier.FREE.code)
+        root.put("weeklyAiTokensRemaining", profile?.weeklyAiTokensRemaining ?: 10L)
         root.put("periods", JSONArray().apply {
             periods.forEach { p ->
                 put(JSONObject().apply {

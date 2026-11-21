@@ -39,6 +39,10 @@ service cloud.firestore {
              data.remindersEnabled is bool &&
              data.aiConsentGranted is bool &&
              data.cloudSyncConsentGranted is bool &&
+             (!('serviceTier' in data) || data.serviceTier in ['FREE', 'TIER_1', 'TIER_2', 'TIER_3']) &&
+             (!('weeklyAiTokensRemaining' in data) || (data.weeklyAiTokensRemaining is int && data.weeklyAiTokensRemaining >= 0 && data.weeklyAiTokensRemaining <= 10)) &&
+             (!('weeklyTokenResetEpochDay' in data) || (data.weeklyTokenResetEpochDay is int && data.weeklyTokenResetEpochDay >= 0 && data.weeklyTokenResetEpochDay <= 100000)) &&
+             (!('preferredConsultMode' in data) || data.preferredConsultMode in ['ONLINE', 'IN_PERSON']) &&
              data.createdAt is timestamp && data.createdAt <= request.time &&
              data.updatedAt is timestamp && data.updatedAt <= request.time;
     }
@@ -84,7 +88,7 @@ service cloud.firestore {
 
     function isValidHealthRecord(data, userId) {
       return data.userId is string && data.userId == userId &&
-             data.recordType in ['DIAGNOSIS', 'MEDICATION', 'ALLERGY', 'LAB_REPORT', 'ULTRASOUND', 'CONSULTATION', 'NOTE'] &&
+             data.recordType in ['DIAGNOSIS', 'MEDICATION', 'ALLERGY', 'LAB_REPORT', 'ULTRASOUND', 'CONSULTATION', 'E_PRESCRIPTION', 'NOTE'] &&
              data.title is string && data.title.size() >= 1 && data.title.size() <= 120 &&
              data.dateText is string && data.dateText.size() <= 40 &&
              data.details is string && data.details.size() <= 1500 &&
@@ -134,6 +138,8 @@ service cloud.firestore {
                          'userId', 'displayName', 'preferredLanguage', 'city', 'ageConfirmed18Plus',
                          'healthInterests', 'discreetMode', 'onboardingCompleted',
                          'remindersEnabled', 'aiConsentGranted', 'cloudSyncConsentGranted',
+                         'serviceTier', 'weeklyAiTokensRemaining', 'weeklyTokenResetEpochDay',
+                         'preferredConsultMode',
                          'createdAt', 'updatedAt'
                        ]) &&
                        isValidUserProfile(incoming(), userId);
@@ -146,6 +152,8 @@ service cloud.firestore {
                          'displayName', 'preferredLanguage', 'city', 'ageConfirmed18Plus',
                          'healthInterests', 'discreetMode', 'onboardingCompleted',
                          'remindersEnabled', 'aiConsentGranted', 'cloudSyncConsentGranted',
+                         'serviceTier', 'weeklyAiTokensRemaining', 'weeklyTokenResetEpochDay',
+                         'preferredConsultMode',
                          'updatedAt'
                        ]);
 

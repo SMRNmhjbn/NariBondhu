@@ -64,6 +64,7 @@ import com.example.core.LocalPrivacyPreferences
 import com.example.core.configureAppCheck
 import com.example.data.AppLanguage
 import com.example.data.ConsentType
+import com.example.data.ConsultationType
 import com.example.data.MenstrualPeriod
 import com.example.data.NariBondhuAiRepository
 import com.example.data.NariBondhuRepository
@@ -84,6 +85,7 @@ import com.example.ui.health.MyHealthScreen
 import com.example.ui.home.HealthSubTab
 import com.example.ui.home.HomeDashboardScreen
 import com.example.ui.profile.ProfileAndPrivacyScreen
+import com.example.ui.profile.TierPlansDialog
 import com.example.ui.theme.NariBondhuTheme
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -184,6 +186,9 @@ private fun NariBondhuRootApp() {
         val consentLogsState by viewModel.consentLogsState.collectAsStateWithLifecycle()
         val cycleStats by viewModel.cycleStats.collectAsStateWithLifecycle()
         val recentSafetyTier by viewModel.recentSymptomSafetyTier.collectAsStateWithLifecycle()
+        val activeServiceTier by viewModel.activeServiceTier.collectAsStateWithLifecycle()
+        val tierEntitlements by viewModel.tierEntitlements.collectAsStateWithLifecycle()
+        val weeklyTokensRemaining by viewModel.weeklyTokensRemaining.collectAsStateWithLifecycle()
         val statusBanner by viewModel.statusBanner.collectAsStateWithLifecycle()
         val chatMessages by viewModel.chatMessages.collectAsStateWithLifecycle()
         val aiStreamState by viewModel.aiStreamState.collectAsStateWithLifecycle()
@@ -264,6 +269,7 @@ private fun NariBondhuRootApp() {
                     var showSymptomDialog by remember { mutableStateOf(false) }
                     var symptomDefaultCategory by remember { mutableStateOf(SymptomCategory.GENERAL) }
                     var showWellnessDialog by remember { mutableStateOf(false) }
+                    var showPlansDialog by remember { mutableStateOf(false) }
 
                     BackHandler(enabled = currentTab != MainTab.HOME) {
                         currentTab = MainTab.HOME
@@ -334,12 +340,15 @@ private fun NariBondhuRootApp() {
                                             discreetMode = profile.discreetMode,
                                             cycleStats = cycleStats,
                                             recentSafetyTier = recentSafetyTier,
+                                            entitlements = tierEntitlements,
+                                            weeklyTokensRemaining = weeklyTokensRemaining,
                                             upcomingBookings = bookings,
                                             onToggleLanguage = { lang ->
                                                 scope.launch { privacyPrefs.setLanguage(lang) }
                                                 viewModel.updateLanguage(lang)
                                             },
                                             onToggleDiscreet = { enabled -> viewModel.toggleDiscreetMode(enabled) },
+                                            onOpenPlans = { showPlansDialog = true },
                                             onQuickLogPeriod = {
                                                 editingPeriod = null
                                                 periodDefaultDay = EpochDateUtil.todayEpochDay()
@@ -362,14 +371,18 @@ private fun NariBondhuRootApp() {
                                             onSelectTab = { selectedHealthTab = it },
                                             language = activeLanguage,
                                             discreetMode = profile.discreetMode,
+                                            entitlements = tierEntitlements,
+                                            healthInterests = profile.healthInterests,
                                             periods = periods,
                                             cycleStats = cycleStats,
                                             symptoms = symptoms,
                                             wellnessLogs = wellnessLogs,
                                             healthRecords = healthRecords,
+                                            bookings = bookings,
                                             extractionState = extractionState,
                                             summaryPrepState = summaryPrepState,
                                             aiConsentGranted = profile.aiConsentGranted,
+                                            onOpenPlans = { showPlansDialog = true },
                                             onSavePeriod = { period -> viewModel.savePeriod(period) },
                                             onOpenPeriodDialog = { p, day ->
                                                 editingPeriod = p
@@ -380,6 +393,9 @@ private fun NariBondhuRootApp() {
                                             onOpenSymptomDialog = { cat ->
                                                 symptomDefaultCategory = cat
                                                 showSymptomDialog = true
+                                            },
+                                            onSavePcosCheckIn = { entries, onResult ->
+                                                viewModel.addPcosDailyCheckIn(entries, onResult)
                                             },
                                             onDeleteSymptom = { id -> viewModel.deleteSymptom(id) },
                                             onOpenWellnessDialog = { showWellnessDialog = true },
@@ -392,6 +408,9 @@ private fun NariBondhuRootApp() {
                                                 viewModel.generatePreConsultationSummary(activeLanguage)
                                             },
                                             onBuildPlainSummaryText = { viewModel.buildDeidentifiedSummaryText() },
+                                            onSaveClinicianEPrescription = { booking, dateText, impression, regimen, followUp ->
+                                                viewModel.saveClinicianEPrescription(booking, dateText, impression, regimen, followUp)
+                                            },
                                             onOpenBondhuHelp = { currentTab = MainTab.BONDHU_HELP },
                                             onAskAiTopic = { topic ->
                                                 currentTab = MainTab.AI
@@ -409,11 +428,14 @@ private fun NariBondhuRootApp() {
                                         MainTab.AI -> NariBondhuAiScreen(
                                             language = activeLanguage,
                                             aiConsentGranted = profile.aiConsentGranted,
+                                            entitlements = tierEntitlements,
+                                            weeklyTokensRemaining = weeklyTokensRemaining,
                                             chatMessages = chatMessages,
                                             aiStreamState = aiStreamState,
                                             onGrantAiConsent = {
                                                 viewModel.updateConsent(ConsentType.AI_DATA_PROCESSING, true)
                                             },
+                                            onOpenPlans = { showPlansDialog = true },
                                             onOpenLibrary = {
                                                 selectedHealthTab = HealthSubTab.LIBRARY
                                                 currentTab = MainTab.MY_HEALTH
@@ -427,10 +449,18 @@ private fun NariBondhuRootApp() {
                                         MainTab.BONDHU_HELP -> BondhuHelpScreen(
                                             language = activeLanguage,
                                             userCity = profile.city,
+                                            entitlements = tierEntitlements,
+                                            preferredConsultMode = ConsultationType.fromName(profile.preferredConsultMode),
                                             healthRecords = healthRecords,
                                             bookings = bookings,
                                             summaryPrepState = summaryPrepState,
                                             aiConsentGranted = profile.aiConsentGranted,
+                                            onSetPreferredConsultMode = { mode -> viewModel.setPreferredConsultMode(mode) },
+                                            onOpenPlans = { showPlansDialog = true },
+                                            onOpenLifestyleAndRx = {
+                                                selectedHealthTab = HealthSubTab.LIFESTYLE_RX
+                                                currentTab = MainTab.MY_HEALTH
+                                            },
                                             onGenerateSummary = { viewModel.generatePreConsultationSummary(activeLanguage) },
                                             onBookAppointment = { doctor, cType, slot, share, recIds, notes ->
                                                 viewModel.bookAppointment(doctor, cType, slot, share, recIds, notes)
@@ -445,7 +475,10 @@ private fun NariBondhuRootApp() {
                                             language = activeLanguage,
                                             discreetMode = profile.discreetMode,
                                             pinEnabled = pinEnabled,
+                                            activeTier = activeServiceTier,
+                                            weeklyTokensRemaining = weeklyTokensRemaining,
                                             consentLogs = consentLogs,
+                                            onSelectTier = { tier -> viewModel.selectServiceTier(tier) },
                                             onLanguageChange = { lang ->
                                                 scope.launch { privacyPrefs.setLanguage(lang) }
                                                 viewModel.updateLanguage(lang)
@@ -506,6 +539,16 @@ private fun NariBondhuRootApp() {
                                     viewModel.addWellnessLog(log)
                                     showWellnessDialog = false
                                 },
+                            )
+                        }
+
+                        if (showPlansDialog) {
+                            TierPlansDialog(
+                                activeTier = activeServiceTier,
+                                weeklyTokensRemaining = weeklyTokensRemaining,
+                                language = activeLanguage,
+                                onSelectTier = { chosen -> viewModel.selectServiceTier(chosen) },
+                                onDismiss = { showPlansDialog = false },
                             )
                         }
                     }

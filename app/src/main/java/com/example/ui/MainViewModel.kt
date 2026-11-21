@@ -8,19 +8,24 @@ import com.example.core.ClinicalRulesEngine
 import com.example.core.CycleCalculationEngine
 import com.example.core.CycleStatistics
 import com.example.core.EpochDateUtil
+import com.example.core.ServiceTierEngine
+import com.example.core.TierEntitlements
 import com.example.data.AppLanguage
 import com.example.data.AppointmentBooking
 import com.example.data.BookingStatus
 import com.example.data.ChatMessage
 import com.example.data.ConsentLog
 import com.example.data.ConsentType
+import com.example.data.ConsultationType
 import com.example.data.DoctorProfile
 import com.example.data.ExtractedReportPreview
 import com.example.data.HealthRecord
+import com.example.data.HealthRecordType
 import com.example.data.MenstrualPeriod
 import com.example.data.NariBondhuAiRepository
 import com.example.data.NariBondhuRepository
 import com.example.data.SafetyTier
+import com.example.data.ServiceTier
 import com.example.data.SymptomEntry
 import com.example.data.UserProfile
 import com.example.data.WellnessLog
@@ -138,6 +143,36 @@ class MainViewModel(
             initialValue = SafetyTier.GREEN
         )
 
+    val activeServiceTier: StateFlow<ServiceTier> = profileState
+        .map { state ->
+            val raw = (state as? UiState.Success)?.data?.serviceTier
+            ServiceTier.fromCode(raw)
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(STOP_TIMEOUT),
+            initialValue = ServiceTier.FREE
+        )
+
+    val tierEntitlements: StateFlow<TierEntitlements> = activeServiceTier
+        .map { ServiceTierEngine.entitlementsFor(it) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(STOP_TIMEOUT),
+            initialValue = ServiceTierEngine.entitlementsFor(ServiceTier.FREE)
+        )
+
+    val weeklyTokensRemaining: StateFlow<Int> = profileState
+        .map { state ->
+            val profile = (state as? UiState.Success)?.data
+            ServiceTierEngine.resolveWeeklyTokenStatus(profile).tokensRemaining
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(STOP_TIMEOUT),
+            initialValue = ServiceTierEngine.FREE_WEEKLY_AI_TOKENS
+        )
+
     private val _statusBanner = MutableStateFlow<String?>(null)
     val statusBanner: StateFlow<String?> = _statusBanner.asStateFlow()
 
@@ -154,6 +189,24 @@ class MainViewModel(
     val summaryPrepState: StateFlow<SummaryPrepState> = _summaryPrepState.asStateFlow()
 
     private var aiJob: Job? = null
+    private var lastAutoResetEpochDay: Long? = null
+
+    init {
+        viewModelScope.launch {
+            profileState.collect { state ->
+                val profile = (state as? UiState.Success)?.data ?: return@collect
+                if (!profile.onboardingCompleted) return@collect
+                val tokenStatus = ServiceTierEngine.resolveWeeklyTokenStatus(profile)
+                if (tokenStatus.needsFirestoreSync && lastAutoResetEpochDay != tokenStatus.resetEpochDay) {
+                    lastAutoResetEpochDay = tokenStatus.resetEpochDay
+                    repository.syncWeeklyTokens(
+                        remaining = tokenStatus.tokensRemaining.toLong(),
+                        resetEpochDay = tokenStatus.resetEpochDay,
+                    )
+                }
+            }
+        }
+    }
 
     fun clearStatusBanner() {
         _statusBanner.value = null
@@ -182,6 +235,10 @@ class MainViewModel(
                 remindersEnabled = remindersEnabled,
                 aiConsentGranted = aiConsentGranted,
                 cloudSyncConsentGranted = cloudSyncConsentGranted,
+                serviceTier = ServiceTier.FREE.code,
+                weeklyAiTokensRemaining = ServiceTierEngine.FREE_WEEKLY_AI_TOKENS.toLong(),
+                weeklyTokenResetEpochDay = EpochDateUtil.todayEpochDay(),
+                preferredConsultMode = ConsultationType.ONLINE.name,
             )
             val res = repository.saveInitialProfile(profile)
             if (res.isSuccess) {
@@ -202,6 +259,28 @@ class MainViewModel(
                 )
             } else {
                 _statusBanner.value = res.exceptionOrNull()?.localizedMessage ?: "Failed to save onboarding."
+            }
+        }
+    }
+
+    fun selectServiceTier(tier: ServiceTier) {
+        viewModelScope.launch {
+            val res = repository.updateServiceTier(tier)
+            _statusBanner.value = if (res.isSuccess) {
+                "${tier.enName} (${tier.enPriceLabel}) activated. Privacy remains fully enabled."
+            } else {
+                res.exceptionOrNull()?.localizedMessage ?: "Could not switch care plan."
+            }
+        }
+    }
+
+    fun setPreferredConsultMode(mode: ConsultationType) {
+        viewModelScope.launch {
+            val res = repository.updatePreferredConsultMode(mode)
+            _statusBanner.value = if (res.isSuccess) {
+                "Consultation preference updated to ${mode.enLabel}."
+            } else {
+                res.exceptionOrNull()?.localizedMessage ?: "Could not update consultation format."
             }
         }
     }
@@ -277,6 +356,22 @@ class MainViewModel(
         }
     }
 
+    fun addPcosDailyCheckIn(
+        entries: List<SymptomEntry>,
+        onResult: (Result<Int>) -> Unit = {},
+    ) {
+        viewModelScope.launch {
+            val res = repository.addSymptomsBatch(entries)
+            _statusBanner.value = if (res.isSuccess) {
+                val count = res.getOrDefault(entries.size)
+                if (count == 1) "Saved 1 PCOS symptom marker." else "Saved $count PCOS symptom markers."
+            } else {
+                res.exceptionOrNull()?.localizedMessage ?: "Failed to save PCOS check-in."
+            }
+            onResult(res)
+        }
+    }
+
     fun deleteSymptom(symptomId: String) {
         viewModelScope.launch {
             val res = repository.deleteSymptom(symptomId)
@@ -345,6 +440,19 @@ class MainViewModel(
         notesForDoctor: String,
     ) {
         viewModelScope.launch {
+            val profile = (profileState.value as? UiState.Success)?.data
+            val tier = ServiceTier.fromCode(profile?.serviceTier)
+            val entitlements = ServiceTierEngine.entitlementsFor(tier)
+            val consultEnum = ConsultationType.fromName(consultationType)
+            val preferredEnum = ConsultationType.fromName(profile?.preferredConsultMode)
+            if (!entitlements.canUseConsultationType(consultEnum, preferredEnum)) {
+                _statusBanner.value = if (!entitlements.canBookConsultation) {
+                    "Upgrade to Tier 2 (BDT 450/mo) or Tier 3 (BDT 900/mo) to book consultations."
+                } else {
+                    "Tier 2 supports ${preferredEnum.enLabel}. Switch mode or upgrade to Tier 3 for both."
+                }
+                return@launch
+            }
             val fee = if (consultationType == "ONLINE") doctor.onlineFeeBdt.toLong() else doctor.inPersonFeeBdt.toLong()
             val booking = AppointmentBooking(
                 userId = currentUserId,
@@ -387,6 +495,35 @@ class MainViewModel(
         }
     }
 
+    fun saveClinicianEPrescription(
+        booking: AppointmentBooking,
+        issuedDateText: String,
+        clinicalImpression: String,
+        regimenNotes: String,
+        followUpInstructions: String,
+    ) {
+        viewModelScope.launch {
+            if (!tierEntitlements.value.hasEPrescription) {
+                _statusBanner.value = "E-Prescription access is included in Tier 3 (BDT 900/month)."
+                return@launch
+            }
+            val record = ServiceTierEngine.buildClinicianEPrescriptionRecord(
+                userId = currentUserId,
+                booking = booking,
+                issuedDateText = issuedDateText,
+                clinicalImpression = clinicalImpression,
+                regimenNotes = regimenNotes,
+                followUpInstructions = followUpInstructions,
+            )
+            val res = repository.addHealthRecord(record)
+            _statusBanner.value = if (res.isSuccess) {
+                "Verified E-Prescription saved to your Tier 3 Health Records."
+            } else {
+                res.exceptionOrNull()?.localizedMessage ?: "Failed to save e-prescription."
+            }
+        }
+    }
+
     fun updateBookingStatus(bookingId: String, status: BookingStatus, slotLabel: String) {
         viewModelScope.launch {
             val res = repository.updateBookingStatus(bookingId, status, slotLabel)
@@ -409,6 +546,20 @@ class MainViewModel(
         val recentSymptoms = (symptomsState.value as? UiState.Success)?.data.orEmpty()
         val assessment = ClinicalRulesEngine.evaluateMessage(trimmed, recentSymptoms)
 
+        val currentProfile = (profileState.value as? UiState.Success)?.data
+        val entitlements = ServiceTierEngine.entitlementsFor(ServiceTier.fromCode(currentProfile?.serviceTier))
+        val tokenStatus = ServiceTierEngine.resolveWeeklyTokenStatus(currentProfile)
+
+        // Enforce weekly 10-token limit on Free Tier (emergency RED triage stays free & immediate!)
+        if (assessment.tier != SafetyTier.RED && !entitlements.hasUnlimitedAiTokens && tokenStatus.tokensRemaining <= 0) {
+            _statusBanner.value = if (language == AppLanguage.BN) {
+                "এই সপ্তাহের ১০টি ফ্রি AI টোকেন শেষ হয়েছে। আনলিমিটেড AI-এর জন্য টিয়ার ১ (৳২০০/মাস) চালু করুন।"
+            } else {
+                "All 10 free weekly AI tokens are used. Upgrade to Tier 1 (BDT 200/mo) for unlimited AI."
+            }
+            return
+        }
+
         val userMsg = ChatMessage(
             id = "u_${System.currentTimeMillis()}",
             isUser = true,
@@ -417,7 +568,7 @@ class MainViewModel(
         )
         _chatMessages.value = _chatMessages.value + userMsg
 
-        // RED Urgent Medical Escalation: deterministic immediate guidance takes precedence; do not delay care!
+        // RED Urgent Medical Escalation: deterministic immediate guidance takes precedence; never paywalled!
         if (assessment.tier == SafetyTier.RED) {
             val urgentBody = if (language == AppLanguage.BN) {
                 "${assessment.reasonBn}\n\n• বাংলাদেশে জরুরি নম্বরে কল করুন: ৯৯৯\n• নিকটস্থ হাসপাতালের জরুরি বিভাগে সরাসরি যান।\n• জরুরি অবস্থায় সাধারণ অ্যাপয়েন্টমেন্ট বা চ্যাটের জন্য অপেক্ষা করবেন না।"
@@ -473,6 +624,14 @@ class MainViewModel(
                 )
                 _chatMessages.value = _chatMessages.value + aiMsg
                 _aiStreamState.value = AiStreamState.Idle
+
+                if (!entitlements.hasUnlimitedAiTokens) {
+                    val updatedTokens = (tokenStatus.tokensRemaining - 1).coerceAtLeast(0).toLong()
+                    repository.syncWeeklyTokens(
+                        remaining = updatedTokens,
+                        resetEpochDay = tokenStatus.resetEpochDay,
+                    )
+                }
             } catch (e: TimeoutCancellationException) {
                 Log.e(TAG, "AI stream timed out", e)
                 _aiStreamState.value = AiStreamState.Error("NariBondhu AI timed out after 60 seconds. Please try again.")

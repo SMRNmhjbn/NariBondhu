@@ -59,6 +59,7 @@ import com.example.core.rememberTtsSpeaker
 import com.example.data.AppLanguage
 import com.example.data.ConsentLog
 import com.example.data.ConsentType
+import com.example.data.ServiceTier
 import com.example.data.UserProfile
 import com.example.ui.theme.DeepPlum
 import com.example.ui.theme.DeepPlumDark
@@ -77,7 +78,10 @@ fun ProfileAndPrivacyScreen(
     language: AppLanguage,
     discreetMode: Boolean,
     pinEnabled: Boolean,
+    activeTier: ServiceTier,
+    weeklyTokensRemaining: Int,
     consentLogs: List<ConsentLog>,
+    onSelectTier: (ServiceTier) -> Unit,
     onLanguageChange: (AppLanguage) -> Unit,
     onToggleDiscreetMode: (Boolean) -> Unit,
     onSetPin: (String?) -> Unit,
@@ -293,33 +297,28 @@ fun ProfileAndPrivacyScreen(
             }
         }
 
-        // Free Essential Safety vs Optional Premium Care Plan (PRD Section 17.2)
+        // Care Plans & Tiers (Free, Tier 1 ৳200, Tier 2 ৳450, Tier 3 ৳900) + Always-On Privacy
         item {
             Card(
-                shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MutedRoseContainer,
-                    contentColor = InkPrimary,
-                ),
-                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(20.dp)),
             ) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Icon(Icons.Rounded.Star, contentDescription = null, tint = DeepPlumDark)
+                        Icon(Icons.Rounded.Star, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                         Text(
-                            if (isBn) "নারীবন্ধু ফ্রি ও প্রিমিয়াম স্বচ্ছতা" else "Always-Free Safety + Optional Care Plan",
+                            if (isBn) "কেয়ার প্ল্যান ও সেবা স্তর (সবার জন্য প্রাইভেসি ফ্রি)" else "Service Tiers & Always-Included Privacy",
                             style = MaterialTheme.typography.titleMedium,
-                            color = DeepPlumDark,
                         )
                     }
-                    Text(
-                        if (isBn) {
-                            "চক্র ও লক্ষণ ট্র্যাকিং, স্বাস্থ্য পাঠাগার, জরুরি নিরাপত্তা সতর্কতা এবং ডাক্তার ডিরেক্টরি সবার জন্য চিরকাল ফ্রি। ভবিষ্যতে ঐচ্ছিক প্রিমিয়াম (৳৯৯/মাস) অতিরিক্ত রিপোর্ট সুবিধা দিতে পারে।"
-                        } else {
-                            "Cycle & symptom tracking, Health Library, Red/Amber safety escalation, and BondhuHelp directory access always remain FREE (never paywalled). Optional future Premium (৳99/month) supports extended insights."
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = InkPrimary,
+                    TierPlansComparisonSection(
+                        activeTier = activeTier,
+                        weeklyTokensRemaining = weeklyTokensRemaining,
+                        language = language,
+                        onSelectTier = onSelectTier,
                     )
                 }
             }

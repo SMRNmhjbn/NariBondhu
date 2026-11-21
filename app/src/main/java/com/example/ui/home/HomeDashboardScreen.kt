@@ -25,6 +25,7 @@ import androidx.compose.material.icons.rounded.EditNote
 import androidx.compose.material.icons.rounded.FolderShared
 import androidx.compose.material.icons.rounded.HealthAndSafety
 import androidx.compose.material.icons.rounded.LocalHospital
+import androidx.compose.material.icons.rounded.Medication
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.Psychology
 import androidx.compose.material.icons.rounded.SelfImprovement
@@ -58,11 +59,14 @@ import androidx.compose.ui.unit.dp
 import com.example.core.AppStrings
 import com.example.core.CycleStatistics
 import com.example.core.EpochDateUtil
+import com.example.core.TierEntitlements
 import com.example.data.AppLanguage
 import com.example.data.AppointmentBooking
 import com.example.data.BookingStatus
 import com.example.data.SafetyTier
+import com.example.data.ServiceTier
 import com.example.data.UserProfile
+import com.example.ui.profile.ActiveTierStatusPill
 import com.example.ui.theme.DeepPlum
 import com.example.ui.theme.DeepPlumDark
 import com.example.ui.theme.InkPrimary
@@ -77,7 +81,7 @@ import com.example.ui.theme.WarmIvory
 import kotlin.math.roundToInt
 
 enum class HealthSubTab {
-    CYCLE, PCOS_PMS, WELLNESS, LIBRARY, RECORDS
+    CYCLE, PCOS_PMS, WELLNESS, LIFESTYLE_RX, LIBRARY, RECORDS
 }
 
 @Composable
@@ -87,9 +91,12 @@ fun HomeDashboardScreen(
     discreetMode: Boolean,
     cycleStats: CycleStatistics,
     recentSafetyTier: SafetyTier,
+    entitlements: TierEntitlements,
+    weeklyTokensRemaining: Int,
     upcomingBookings: List<AppointmentBooking>,
     onToggleLanguage: (AppLanguage) -> Unit,
     onToggleDiscreet: (Boolean) -> Unit,
+    onOpenPlans: () -> Unit,
     onQuickLogPeriod: () -> Unit,
     onQuickLogSymptom: () -> Unit,
     onOpenAi: () -> Unit,
@@ -209,6 +216,27 @@ fun HomeDashboardScreen(
                                     style = MaterialTheme.typography.labelMedium,
                                     color = Lavender,
                                 )
+                            }
+                        }
+
+                        // Active Care Tier pill + Privacy guarantee note
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            ActiveTierStatusPill(
+                                tier = entitlements.tier,
+                                weeklyTokensRemaining = weeklyTokensRemaining,
+                                language = language,
+                                onClick = onOpenPlans,
+                            )
+                            TextButton(
+                                onClick = onOpenPlans,
+                                colors = ButtonDefaults.textButtonColors(contentColor = WarmIvory),
+                                modifier = Modifier.testTag("home_manage_plans_btn"),
+                            ) {
+                                Text(if (isBn) "প্ল্যান দেখুন" else "All Plans")
                             }
                         }
                     }
@@ -380,6 +408,43 @@ fun HomeDashboardScreen(
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                    } else if (!entitlements.hasCycleAnalysis) {
+                        Text(
+                            text = if (isBn) {
+                                "নথিভুক্ত পিরিয়ড এন্ট্রি: ${cycleStats.recordedPeriodCount}টি (ফ্রি প্ল্যানে ক্যালেন্ডার চালু আছে)।"
+                            } else {
+                                "Recorded cycles: ${cycleStats.recordedPeriodCount} (Period Calendar & Logs included in Free Plan)."
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Surface(
+                            color = MutedRoseContainer,
+                            contentColor = DeepPlumDark,
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                            ) {
+                                Text(
+                                    text = if (isBn) {
+                                        "গভীর চক্র বিশ্লেষণ ও সম্ভাব্য পূর্বাভাস — টিয়ার ১ (৳২০০/মাস)"
+                                    } else {
+                                        "Unlock Cycle Analysis & Predictions in Tier 1 (BDT 200/mo)"
+                                    },
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = DeepPlumDark,
+                                    fontWeight = FontWeight.SemiBold,
+                                    modifier = Modifier.weight(1f),
+                                )
+                                TextButton(onClick = onOpenPlans) {
+                                    Text(if (isBn) "আপগ্রেড" else "Upgrade", color = DeepPlum, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
                     } else {
                         if (cycleStats.estimatedWindowStartEpochDay != null && cycleStats.estimatedWindowEndEpochDay != null) {
                             val startStr = EpochDateUtil.formatEpochDay(cycleStats.estimatedWindowStartEpochDay, isBn)
@@ -474,8 +539,14 @@ fun HomeDashboardScreen(
                 ModuleCard(
                     icon = Icons.Rounded.Spa,
                     title = if (isBn) "পিসিওএস ও পিএমএস সহায়তা" else "PCOS & PMS Specialised Support",
-                    subtitle = if (isBn) "লক্ষণের ধারা, জীবনযাত্রা ও ডাক্তার ভিজিটের প্রস্তুতি" else "Pattern tracking, lifestyle guide, and appointment preparation",
+                    subtitle = if (isBn) "টিয়ার ১ (৳২০০/মাস): ব্যক্তিগত লক্ষণ ও ভিজিট প্রস্তুতি" else "Tier 1 (BDT 200/mo): Personalised pattern tracking & appointment prep",
                     onClick = { onOpenHealthModule(HealthSubTab.PCOS_PMS) },
+                )
+                ModuleCard(
+                    icon = Icons.Rounded.Medication,
+                    title = if (isBn) "ই-প্রেসক্রিপশন ও জীবনযাত্রা গাইড" else "E-Prescription & Lifestyle Guide",
+                    subtitle = if (isBn) "টিয়ার ৩ (৳৯০০/মাস): ডাক্তার Rx ও ব্যক্তিগত জীবনযাত্রা গাইড" else "Tier 3 (BDT 900/mo): Clinician E-Rx vault & tailored lifestyle guide",
+                    onClick = { onOpenHealthModule(HealthSubTab.LIFESTYLE_RX) },
                 )
                 ModuleCard(
                     icon = Icons.Rounded.SelfImprovement,
@@ -498,7 +569,7 @@ fun HomeDashboardScreen(
                 ModuleCard(
                     icon = Icons.Rounded.HealthAndSafety,
                     title = "NariBondhu AI & BondhuHelp",
-                    subtitle = if (isBn) "স্বাস্থ্য প্রশ্নোত্তর ও BMDC-যাচাইকৃত ডাক্তার বুকিং" else "Guided health Q&A + verified gynaecologist appointments",
+                    subtitle = if (isBn) "ফ্রি: ১০ AI টোকেন/সপ্তাহ • টিয়ার ২/৩: ডাক্তার কনসালটেশন" else "Free: 10 AI tokens/wk • Tier 2/3: Online & Offline doctor care",
                     onClick = onOpenBondhuHelp,
                 )
             }

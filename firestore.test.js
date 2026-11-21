@@ -264,3 +264,70 @@ test("BondhuHelp booking lifecycle enforces terminal state locking", async () =>
     })
   );
 });
+
+test("Service tier updates, weekly token bounds, and Tier 3 E_PRESCRIPTION records validate cleanly", async () => {
+  const aliceDb = testEnv.authenticatedContext(ALICE_UID).firestore();
+  const ts = new Date(Date.now() - 5000);
+
+  await assertSucceeds(
+    aliceDb.collection("users").doc(ALICE_UID).set({
+      userId: ALICE_UID,
+      displayName: "Nusrat",
+      preferredLanguage: "BN",
+      city: "Dhaka",
+      ageConfirmed18Plus: true,
+      healthInterests: ["PCOS"],
+      discreetMode: false,
+      onboardingCompleted: true,
+      remindersEnabled: true,
+      aiConsentGranted: true,
+      cloudSyncConsentGranted: true,
+      serviceTier: "FREE",
+      weeklyAiTokensRemaining: 10,
+      weeklyTokenResetEpochDay: 20778,
+      preferredConsultMode: "ONLINE",
+      createdAt: ts,
+      updatedAt: ts,
+    })
+  );
+
+  // Decrement token and upgrade to TIER_2 with IN_PERSON mode
+  await assertSucceeds(
+    aliceDb.collection("users").doc(ALICE_UID).update({
+      weeklyAiTokensRemaining: 9,
+      serviceTier: "TIER_2",
+      preferredConsultMode: "IN_PERSON",
+      updatedAt: new Date(Date.now() - 1000),
+    })
+  );
+
+  // Invalid tier or token > 10 must fail
+  await assertFails(
+    aliceDb.collection("users").doc(ALICE_UID).update({
+      serviceTier: "TIER_99",
+      updatedAt: new Date(Date.now() - 500),
+    })
+  );
+  await assertFails(
+    aliceDb.collection("users").doc(ALICE_UID).update({
+      weeklyAiTokensRemaining: 25,
+      updatedAt: new Date(Date.now() - 500),
+    })
+  );
+
+  // E_PRESCRIPTION health record allowed
+  await assertSucceeds(
+    aliceDb.collection("users").doc(ALICE_UID).collection("health_records").doc("rx1").set({
+      userId: ALICE_UID,
+      recordType: "E_PRESCRIPTION",
+      title: "BMDC Rx — Dr. Farhana Rahman",
+      dateText: "2026-11-21",
+      details: "Tab. Myo-inositol + Folic Acid once daily after dinner x 30 days.",
+      verifiedByUser: true,
+      sharedWithDoctorIds: ["doc_dhk_01"],
+      createdAt: ts,
+      updatedAt: ts,
+    })
+  );
+});
+

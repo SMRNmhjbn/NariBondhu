@@ -66,6 +66,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.R
+import com.example.core.ConsultationAccessMode
+import com.example.core.TierEntitlements
 import com.example.data.AppLanguage
 import com.example.data.AppointmentBooking
 import com.example.data.BondhuHelpCatalog
@@ -73,12 +75,15 @@ import com.example.data.BookingStatus
 import com.example.data.ConsultationType
 import com.example.data.DoctorProfile
 import com.example.data.HealthRecord
+import com.example.data.ServiceTier
 import com.example.ui.SummaryPrepState
+import com.example.ui.profile.TierLockedFeatureCard
 import com.example.ui.theme.DeepPlum
 import com.example.ui.theme.DeepPlumDark
 import com.example.ui.theme.InkPrimary
 import com.example.ui.theme.InkSecondary
 import com.example.ui.theme.Lavender
+import com.example.ui.theme.MutedRoseContainer
 import com.example.ui.theme.SafetyGreen
 import com.example.ui.theme.SafetyGreenContainer
 import com.example.ui.theme.SafetyRed
@@ -87,10 +92,15 @@ import com.example.ui.theme.SafetyRed
 fun BondhuHelpScreen(
     language: AppLanguage,
     userCity: String,
+    entitlements: TierEntitlements,
+    preferredConsultMode: ConsultationType,
     healthRecords: List<HealthRecord>,
     bookings: List<AppointmentBooking>,
     summaryPrepState: SummaryPrepState,
     aiConsentGranted: Boolean,
+    onSetPreferredConsultMode: (ConsultationType) -> Unit,
+    onOpenPlans: () -> Unit,
+    onOpenLifestyleAndRx: () -> Unit,
     onGenerateSummary: () -> Unit,
     onBookAppointment: (
         doctor: DoctorProfile,
@@ -114,9 +124,13 @@ fun BondhuHelpScreen(
         DoctorBookingDetailScreen(
             doctor = doc,
             language = language,
+            entitlements = entitlements,
+            preferredConsultMode = preferredConsultMode,
             healthRecords = healthRecords,
             summaryPrepState = summaryPrepState,
             aiConsentGranted = aiConsentGranted,
+            onSetPreferredConsultMode = onSetPreferredConsultMode,
+            onOpenPlans = onOpenPlans,
             onGenerateSummary = onGenerateSummary,
             onBack = { selectedDoctor = null },
             onConfirmBooking = { consultType, slot, shareSummary, recIds, notes ->
@@ -220,6 +234,123 @@ fun BondhuHelpScreen(
                     }
                 }
 
+                // Consultation Tier Entitlement Card
+                item {
+                    when (entitlements.consultationAccess) {
+                        ConsultationAccessMode.NONE -> {
+                            Surface(
+                                color = MutedRoseContainer,
+                                contentColor = InkPrimary,
+                                shape = RoundedCornerShape(16.dp),
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Text(
+                                        text = if (isBn) {
+                                            "ডাক্তার বুকিং: টিয়ার ২ (৳৪৫০) বা টিয়ার ৩ (৳৯০০) প্রয়োজন"
+                                        } else {
+                                            "Consultation Booking: Tier 2 (BDT 450/mo) or Tier 3 (BDT 900/mo)"
+                                        },
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = DeepPlumDark,
+                                        fontWeight = FontWeight.Bold,
+                                    )
+                                    Text(
+                                        text = if (isBn) {
+                                            "ডাক্তারদের তালিকা দেখা ফ্রি। অনলাইন অথবা সরাসরি পরামর্শ বুক করতে টিয়ার ২, আর উভয় + ই-প্রেসক্রিপশন ও জীবনযাত্রা গাইডের জন্য টিয়ার ৩ বেছে নিন।"
+                                        } else {
+                                            "Browsing verified doctors is always free. Choose Tier 2 for Online OR Offline consultation, or Tier 3 for BOTH Online & Offline + E-Prescription + Lifestyle Guide."
+                                        },
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = InkPrimary,
+                                    )
+                                    Button(
+                                        onClick = onOpenPlans,
+                                        colors = ButtonDefaults.buttonColors(containerColor = DeepPlum, contentColor = androidx.compose.ui.graphics.Color.White),
+                                        modifier = Modifier.testTag("bondhu_upgrade_plans_btn"),
+                                    ) {
+                                        Text(if (isBn) "প্ল্যান দেখুন ও আপগ্রেড করুন" else "View Tier 2 & Tier 3 Plans")
+                                    }
+                                }
+                            }
+                        }
+
+                        ConsultationAccessMode.ONLINE_OR_OFFLINE -> {
+                            Surface(
+                                color = Lavender,
+                                contentColor = InkPrimary,
+                                shape = RoundedCornerShape(16.dp),
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Text(
+                                        text = if (isBn) "টিয়ার ২ সক্রিয়: অনলাইন অথবা সরাসরি চেম্বার" else "Tier 2 Active: Choose Online OR Offline Consultation",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = DeepPlumDark,
+                                        fontWeight = FontWeight.Bold,
+                                    )
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        ConsultationType.entries.forEach { mode ->
+                                            FilterChip(
+                                                selected = preferredConsultMode == mode,
+                                                onClick = { onSetPreferredConsultMode(mode) },
+                                                label = { Text(if (isBn) mode.bnLabel else mode.enLabel) },
+                                                modifier = Modifier.testTag("tier2_mode_${mode.name.lowercase()}"),
+                                            )
+                                        }
+                                    }
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Text(
+                                            text = if (isBn) "দুটি মাধ্যম + ই-প্রেসক্রিপশন + জীবনযাত্রা গাইডের জন্য টিয়ার ৩"
+                                            else "Need BOTH Online & Offline + E-Rx + Lifestyle Guide?",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = InkSecondary,
+                                            modifier = Modifier.weight(1f),
+                                        )
+                                        TextButton(onClick = onOpenPlans) {
+                                            Text(if (isBn) "টিয়ার ৩ (৳৯০০)" else "Tier 3 (৳900)", color = DeepPlum, fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        ConsultationAccessMode.ONLINE_AND_OFFLINE -> {
+                            Surface(
+                                color = SafetyGreenContainer,
+                                contentColor = InkPrimary,
+                                shape = RoundedCornerShape(16.dp),
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    Text(
+                                        text = if (isBn) "টিয়ার ৩ সম্পূর্ণ সেবা সক্রিয়" else "Tier 3 Complete Care Unlocked",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = SafetyGreen,
+                                        fontWeight = FontWeight.Bold,
+                                    )
+                                    Text(
+                                        text = if (isBn) {
+                                            "অনলাইন এবং সরাসরি উভয় কনসালটেশন + ডাক্তার ই-প্রেসক্রিপশন + জীবনযাত্রা গাইড চালু আছে।"
+                                        } else {
+                                            "Both Online AND Offline consultations are unlocked, plus Doctor E-Prescriptions & Personalised Lifestyle Guide."
+                                        },
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = InkPrimary,
+                                    )
+                                    TextButton(onClick = onOpenLifestyleAndRx) {
+                                        Text(if (isBn) "ই-প্রেসক্রিপশন ও জীবনযাত্রা গাইড খুলুন" else "Open E-Prescriptions & Lifestyle Guide", color = SafetyGreen, fontWeight = FontWeight.Bold)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 item {
                     OutlinedTextField(
                         value = searchQuery,
@@ -306,7 +437,9 @@ fun BondhuHelpScreen(
         } else {
             AppointmentsHistoryTab(
                 language = language,
+                hasEPrescription = entitlements.hasEPrescription,
                 bookings = bookings,
+                onOpenLifestyleAndRx = onOpenLifestyleAndRx,
                 onUpdateBookingStatus = onUpdateBookingStatus,
             )
         }
@@ -407,9 +540,13 @@ private fun DoctorDirectoryCard(
 private fun DoctorBookingDetailScreen(
     doctor: DoctorProfile,
     language: AppLanguage,
+    entitlements: TierEntitlements,
+    preferredConsultMode: ConsultationType,
     healthRecords: List<HealthRecord>,
     summaryPrepState: SummaryPrepState,
     aiConsentGranted: Boolean,
+    onSetPreferredConsultMode: (ConsultationType) -> Unit,
+    onOpenPlans: () -> Unit,
     onGenerateSummary: () -> Unit,
     onBack: () -> Unit,
     onConfirmBooking: (
@@ -422,7 +559,15 @@ private fun DoctorBookingDetailScreen(
 ) {
     BackHandler { onBack() }
     val isBn = language == AppLanguage.BN
-    var consultType by remember { mutableStateOf(ConsultationType.ONLINE.name) }
+    var consultType by remember(entitlements.consultationAccess, preferredConsultMode) {
+        mutableStateOf(
+            if (entitlements.consultationAccess == ConsultationAccessMode.ONLINE_OR_OFFLINE) {
+                preferredConsultMode.name
+            } else {
+                ConsultationType.ONLINE.name
+            }
+        )
+    }
     var selectedSlot by remember { mutableStateOf(doctor.availableSlots.firstOrNull() ?: "Tomorrow • 10:30 AM") }
     var shareSummary by remember { mutableStateOf(false) }
     val selectedRecordIds = remember { mutableStateListOf<String>() }
@@ -463,15 +608,40 @@ private fun DoctorBookingDetailScreen(
 
         Text(if (isBn) "পরামর্শের ধরন বেছে নিন" else "Consultation Format", style = MaterialTheme.typography.titleMedium)
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            val onlineAllowed = entitlements.canUseConsultationType(ConsultationType.ONLINE, preferredConsultMode)
+            val inPersonAllowed = entitlements.canUseConsultationType(ConsultationType.IN_PERSON, preferredConsultMode)
             FilterChip(
                 selected = consultType == ConsultationType.ONLINE.name,
-                onClick = { consultType = ConsultationType.ONLINE.name },
+                onClick = {
+                    if (entitlements.consultationAccess == ConsultationAccessMode.ONLINE_OR_OFFLINE) {
+                        onSetPreferredConsultMode(ConsultationType.ONLINE)
+                    }
+                    consultType = ConsultationType.ONLINE.name
+                },
+                enabled = entitlements.consultationAccess != ConsultationAccessMode.NONE && (onlineAllowed || entitlements.consultationAccess == ConsultationAccessMode.ONLINE_OR_OFFLINE),
                 label = { Text("Online (৳${doctor.onlineFeeBdt})") },
             )
             FilterChip(
                 selected = consultType == ConsultationType.IN_PERSON.name,
-                onClick = { consultType = ConsultationType.IN_PERSON.name },
+                onClick = {
+                    if (entitlements.consultationAccess == ConsultationAccessMode.ONLINE_OR_OFFLINE) {
+                        onSetPreferredConsultMode(ConsultationType.IN_PERSON)
+                    }
+                    consultType = ConsultationType.IN_PERSON.name
+                },
+                enabled = entitlements.consultationAccess != ConsultationAccessMode.NONE && (inPersonAllowed || entitlements.consultationAccess == ConsultationAccessMode.ONLINE_OR_OFFLINE),
                 label = { Text("In-Person (৳${doctor.inPersonFeeBdt})") },
+            )
+        }
+        if (entitlements.consultationAccess == ConsultationAccessMode.ONLINE_OR_OFFLINE) {
+            Text(
+                text = if (isBn) {
+                    "টিয়ার ২: অনলাইন অথবা সরাসরি যেকোনো একটি মাধ্যম চালু থাকে। উভয় মাধ্যম + ই-প্রেসক্রিপশন পেতে টিয়ার ৩ নিন।"
+                } else {
+                    "Tier 2 covers Online OR In-Person consultation. Tap a format to switch, or upgrade to Tier 3 for BOTH + E-Prescription."
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
             )
         }
 
@@ -600,25 +770,51 @@ private fun DoctorBookingDetailScreen(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Button(
-            onClick = {
-                onConfirmBooking(
-                    consultType,
-                    selectedSlot,
-                    shareSummary,
-                    if (shareSummary) selectedRecordIds.toList() else emptyList(),
-                    notesForDoctor,
-                )
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(54.dp)
-                .testTag("confirm_booking_btn"),
-        ) {
-            Text(
-                if (isBn) "অ্যাপয়েন্টমেন্ট নিশ্চিত করুন"
-                else "Confirm Appointment • ৳${if (consultType == ConsultationType.ONLINE.name) doctor.onlineFeeBdt else doctor.inPersonFeeBdt}"
+        if (!entitlements.canBookConsultation) {
+            TierLockedFeatureCard(
+                requiredTier = ServiceTier.TIER_2,
+                title = if (isBn) "কনসালটেশন বুক করতে টিয়ার ২ বা ৩ নিন" else "Upgrade to Book Doctor Consultations",
+                description = if (isBn) {
+                    "টিয়ার ২ (৳৪৫০/মাস)-এ অনলাইন অথবা সরাসরি পরামর্শ বুক করা যাবে। টিয়ার ৩ (৳৯০০/মাস)-এ উভয় মাধ্যম + ই-প্রেসক্রিপশন ও জীবনযাত্রা গাইড পাবেন।"
+                } else {
+                    "Tier 2 (BDT 450/mo) unlocks Online OR Offline consultations. Tier 3 (BDT 900/mo) includes BOTH Online & Offline consultations, E-Prescriptions, and your Lifestyle Guide."
+                },
+                highlights = if (isBn) {
+                    listOf(
+                        "টিয়ার ২ (৳৪৫০): অনলাইন অথবা সরাসরি কনসালটেশন",
+                        "টিয়ার ৩ (৳৯০০): উভয় কনসালটেশন + ই-প্রেসক্রিপশন + জীবনযাত্রা গাইড",
+                    )
+                } else {
+                    listOf(
+                        "Tier 2 (BDT 450/mo): Online OR Offline Consultation + All Tier 1",
+                        "Tier 3 (BDT 900/mo): Online & Offline + E-Prescription + Lifestyle Guide",
+                    )
+                },
+                language = language,
+                onOpenPlans = onOpenPlans,
+                testTag = "booking_locked_tier2_card",
             )
+        } else {
+            Button(
+                onClick = {
+                    onConfirmBooking(
+                        consultType,
+                        selectedSlot,
+                        shareSummary,
+                        if (shareSummary) selectedRecordIds.toList() else emptyList(),
+                        notesForDoctor,
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp)
+                    .testTag("confirm_booking_btn"),
+            ) {
+                Text(
+                    if (isBn) "অ্যাপয়েন্টমেন্ট নিশ্চিত করুন"
+                    else "Confirm Appointment • ৳${if (consultType == ConsultationType.ONLINE.name) doctor.onlineFeeBdt else doctor.inPersonFeeBdt}"
+                )
+            }
         }
     }
 }
@@ -626,7 +822,9 @@ private fun DoctorBookingDetailScreen(
 @Composable
 private fun AppointmentsHistoryTab(
     language: AppLanguage,
+    hasEPrescription: Boolean,
     bookings: List<AppointmentBooking>,
+    onOpenLifestyleAndRx: () -> Unit,
     onUpdateBookingStatus: (bookingId: String, status: BookingStatus, slotLabel: String) -> Unit,
 ) {
     val isBn = language == AppLanguage.BN
@@ -709,6 +907,11 @@ private fun AppointmentsHistoryTab(
                                     colors = ButtonDefaults.outlinedButtonColors(contentColor = SafetyRed),
                                 ) {
                                     Text(if (isBn) "বাতিল" else "Cancel")
+                                }
+                            }
+                            if (hasEPrescription) {
+                                TextButton(onClick = onOpenLifestyleAndRx) {
+                                    Text(if (isBn) "টিয়ার ৩ ই-প্রেসক্রিপশন ও গাইড দেখুন" else "View / Record Tier 3 E-Prescription")
                                 }
                             }
                         }

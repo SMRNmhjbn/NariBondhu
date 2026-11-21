@@ -67,17 +67,22 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.core.AppStrings
+import com.example.core.ServiceTierEngine
+import com.example.core.TierEntitlements
 import com.example.core.TtsSpeaker
 import com.example.core.rememberTtsSpeaker
 import com.example.data.AppLanguage
 import com.example.data.ChatMessage
 import com.example.data.SafetyTier
+import com.example.data.ServiceTier
 import com.example.ui.AiStreamState
+import com.example.ui.profile.TierLockedFeatureCard
 import com.example.ui.theme.DeepPlum
 import com.example.ui.theme.DeepPlumDark
 import com.example.ui.theme.InkPrimary
 import com.example.ui.theme.InkSecondary
 import com.example.ui.theme.Lavender
+import com.example.ui.theme.MutedRoseContainer
 import com.example.ui.theme.SafetyAmber
 import com.example.ui.theme.SafetyAmberContainer
 import com.example.ui.theme.SafetyGreen
@@ -90,9 +95,12 @@ import com.example.ui.theme.SafetyRedContainer
 fun NariBondhuAiScreen(
     language: AppLanguage,
     aiConsentGranted: Boolean,
+    entitlements: TierEntitlements,
+    weeklyTokensRemaining: Int,
     chatMessages: List<ChatMessage>,
     aiStreamState: AiStreamState,
     onGrantAiConsent: () -> Unit,
+    onOpenPlans: () -> Unit,
     onOpenLibrary: () -> Unit,
     onOpenBondhuHelp: () -> Unit,
     onSendMessage: (text: String, includeDeidentifiedSummary: Boolean) -> Unit,
@@ -153,6 +161,54 @@ fun NariBondhuAiScreen(
                     color = DeepPlumDark,
                     fontWeight = FontWeight.Medium,
                 )
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        // Care Tier Token Balance & Privacy Status Bar
+        val hasTokens = entitlements.hasUnlimitedAiTokens || weeklyTokensRemaining > 0
+        Surface(
+            color = if (entitlements.hasUnlimitedAiTokens) SafetyGreenContainer else MutedRoseContainer,
+            contentColor = InkPrimary,
+            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("ai_token_status_banner"),
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = if (entitlements.hasUnlimitedAiTokens) {
+                            if (isBn) "${entitlements.tier.bnName} • আনলিমিটেড AI টোকেন"
+                            else "${entitlements.tier.enName} • Unlimited AI Tokens"
+                        } else {
+                            if (isBn) "ফ্রি প্ল্যান: সপ্তাহে $weeklyTokensRemaining/${ServiceTierEngine.FREE_WEEKLY_AI_TOKENS}টি AI টোকেন বাকি"
+                            else "Free Plan: $weeklyTokensRemaining/${ServiceTierEngine.FREE_WEEKLY_AI_TOKENS} AI tokens left this week"
+                        },
+                        style = MaterialTheme.typography.labelLarge,
+                        color = if (entitlements.hasUnlimitedAiTokens) SafetyGreen else DeepPlumDark,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        text = if (isBn) "প্রাইভেসি ও জরুরি ৯৯৯ সহায়তা সবসময় ফ্রি" else "Full privacy & emergency 999 help always included",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = InkSecondary,
+                    )
+                }
+                if (!entitlements.hasUnlimitedAiTokens) {
+                    TextButton(onClick = onOpenPlans, modifier = Modifier.testTag("ai_upgrade_tier1_btn")) {
+                        Text(
+                            text = if (isBn) "টিয়ার ১ (৳২০০)" else "Tier 1 (৳200)",
+                            color = DeepPlum,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
             }
         }
 
@@ -251,6 +307,7 @@ fun NariBondhuAiScreen(
                                 quickQuestions.forEachIndexed { idx, prompt ->
                                     AssistChip(
                                         onClick = { onSendMessage(prompt, includeSummary) },
+                                        enabled = hasTokens || idx == quickQuestions.lastIndex,
                                         label = { Text(prompt) },
                                         modifier = Modifier.testTag("ai_quick_chip_$idx"),
                                     )
@@ -258,6 +315,36 @@ fun NariBondhuAiScreen(
                             }
                         }
                     }
+                }
+            }
+
+            if (!hasTokens) {
+                item {
+                    TierLockedFeatureCard(
+                        requiredTier = ServiceTier.TIER_1,
+                        title = if (isBn) "এই সপ্তাহের ১০টি ফ্রি AI টোকেন শেষ" else "10 Free Weekly AI Tokens Used",
+                        description = if (isBn) {
+                            "প্রতি সপ্তাহে ১০টি ফ্রি টোকেন স্বয়ংক্রিয়ভাবে রিসেট হয়। এখনই আনলিমিটেড AI, ব্যক্তিগত PCOS/PMS কেয়ার ও চক্র বিশ্লেষণের জন্য টিয়ার ১ (৳২০০/মাস) চালু করুন, অথবা ফ্রি স্বাস্থ্য পাঠাগার পড়ুন।"
+                        } else {
+                            "Your 10 free weekly AI tokens reset automatically every 7 days. Upgrade to Tier 1 (BDT 200/month) for unlimited AI tokens, personalised PCOS/PMS care, and full Cycle Analysis — or read the free Health Library anytime."
+                        },
+                        highlights = if (isBn) {
+                            listOf(
+                                "আনলিমিটেড নারীবন্ধু AI প্রশ্নোত্তর",
+                                "ব্যক্তিগত PCOS ও PMS যত্ন + চক্র বিশ্লেষণ",
+                                "জরুরি ৯৯৯ সহায়তা ও প্রাইভেসি সবসময় ফ্রি",
+                            )
+                        } else {
+                            listOf(
+                                "Unlimited NariBondhu AI chatbot tokens",
+                                "Personalised PCOS/PMS care & full Cycle Analysis",
+                                "Emergency 999 triage & Health Library always free",
+                            )
+                        },
+                        language = language,
+                        onOpenPlans = onOpenPlans,
+                        testTag = "ai_weekly_quota_card",
+                    )
                 }
             }
 
@@ -346,7 +433,13 @@ fun NariBondhuAiScreen(
                 value = inputText,
                 onValueChange = { inputText = it.take(600) },
                 placeholder = {
-                    Text(if (isBn) "আপনার স্বাস্থ্য প্রশ্ন লিখুন..." else "Ask an educational health question...")
+                    Text(
+                        if (!hasTokens) {
+                            if (isBn) "ফ্রি টোকেন শেষ • টিয়ার ১-এ আনলিমিটেড AI" else "0 tokens left • Upgrade to Tier 1 or type urgent signs"
+                        } else {
+                            if (isBn) "আপনার স্বাস্থ্য প্রশ্ন লিখুন..." else "Ask an educational health question..."
+                        }
+                    )
                 },
                 maxLines = 3,
                 shape = RoundedCornerShape(18.dp),

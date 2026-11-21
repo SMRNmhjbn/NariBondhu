@@ -16,6 +16,10 @@
         "remindersEnabled": { "type": "boolean", "description": "Opt-in discreet reminder setting" },
         "aiConsentGranted": { "type": "boolean", "description": "Explicit consent for NariBondhu AI educational queries" },
         "cloudSyncConsentGranted": { "type": "boolean", "description": "Explicit consent for encrypted cloud record storage" },
+        "serviceTier": { "type": "string", "enum": ["FREE", "TIER_1", "TIER_2", "TIER_3"], "description": "Selected NariBondhu care plan tier" },
+        "weeklyAiTokensRemaining": { "type": "integer", "description": "Remaining weekly AI tokens for Free tier (0-10)" },
+        "weeklyTokenResetEpochDay": { "type": "integer", "description": "Epoch day when weekly Free AI tokens were last replenished" },
+        "preferredConsultMode": { "type": "string", "enum": ["ONLINE", "IN_PERSON"], "description": "Chosen single consultation format for Tier 2 users" },
         "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp on creation" },
         "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp on update" }
       },
@@ -126,7 +130,7 @@
       "type": "object",
       "properties": {
         "userId": { "type": "string" },
-        "recordType": { "type": "string", "enum": ["DIAGNOSIS", "MEDICATION", "ALLERGY", "LAB_REPORT", "ULTRASOUND", "CONSULTATION", "NOTE"] },
+        "recordType": { "type": "string", "enum": ["DIAGNOSIS", "MEDICATION", "ALLERGY", "LAB_REPORT", "ULTRASOUND", "CONSULTATION", "E_PRESCRIPTION", "NOTE"] },
         "title": { "type": "string" },
         "dateText": { "type": "string" },
         "details": { "type": "string" },
