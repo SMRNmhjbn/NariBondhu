@@ -411,7 +411,7 @@ assistantEyebrow:"২৪/৭ উপলভ্য · শিক্ষামূল�
     if (profileDiscreet) profileDiscreet.setAttribute("aria-checked", String(!!state.discreetMode));
     const profileAiConsent = $("#profile-ai-consent-toggle");
     if (profileAiConsent) profileAiConsent.setAttribute("aria-checked", String(!!state.aiConsent));
-    $("[data-i18n-placeholder]").forEach(node => node.setAttribute("placeholder", tr(node.dataset.i18nPlaceholder)));
+    $$("[data-i18n-placeholder]").forEach(node => node.setAttribute("placeholder", tr(node.dataset.i18nPlaceholder)));
     document.body.classList.toggle("discreet-mode", !!state.discreetMode);
     $("#demo-banner").hidden = !state.demoMode;
   }
