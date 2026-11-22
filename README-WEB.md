@@ -21,7 +21,7 @@ The assistant will not return model-generated answers until the site owner adds 
 2. In Vercel, open **Project → Settings → Environment Variables**.
 3. Add `OPENAI_API_KEY` and paste the key as its value.
 4. Select **Production** (and Preview too if you want preview deployments to use GPT).
-5. Optionally add `OPENAI_MODEL`; the default is `gpt-5.6-luna` (cost-sensitive model).
+5. Optionally add `OPENAI_MODEL`; the default is `gpt-6-luna` (cost-sensitive model).
 6. Save and redeploy the Production deployment.
 
 **Never put the key in `web/app.js`, HTML, GitHub, or any `NEXT_PUBLIC_*` variable.** The browser calls the same-origin `/api/chat` endpoint; the function keeps the key on the server. OpenAI API billing is separate from a ChatGPT subscription. Set project usage limits and monitor API spend.
