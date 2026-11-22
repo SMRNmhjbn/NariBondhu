@@ -17,14 +17,17 @@ const MAX_ASSISTANT_CHARS = 1400;
 const RED_PATTERNS = [
   "faint", "fainting", "passed out", "unconscious", "collapse",
   "dizzy", "dizziness", "lightheaded",
-  "very heavy bleeding", "soaking", "flooding", "bleeding through pad", "clots every hour",
+  "very heavy bleeding", "heavy bleeding", "soaking", "flooding", "bleeding through pad", "clots every hour",
+  "severe abdominal pain", "severe lower abdominal pain", "severe stomach pain",
+  "can't breathe", "cannot breathe", "difficulty breathing", "trouble breathing",
+  "bleeding in pregnancy", "bleeding while pregnant", "bleeding during pregnancy", "blackout",
   "severe pain", "unbearable pain", "sharp abdominal", "severe pelvic", "excruciating",
   "pregnant and bleeding", "pregnancy bleeding", "ectopic", "positive test and pain",
   "fever and pelvic", "high fever", "chest pain", "shortness of breath",
   "অজ্ঞান", "মাথা ঘোরা", "অতিরিক্ত রক্তপাত", "অতিরিক্ত রক্তক্ষরণ",
   "তীব্র ব্যথা", "অসহ্য ব্যথা", "গর্ভাবস্থায় রক্তপাত", "গর্ভাবস্থায় রক্তপাত",
   "গর্ভবতী অবস্থায় রক্তপাত", "গর্ভবতী অবস্থায় রক্তপাত", "শ্বাসকষ্ট", "বুক ব্যথা",
-  "জ্ঞান হারানো", "প্রচুর রক্তপাত"
+  "জ্ঞান হারানো", "প্রচুর রক্তপাত", "প্রচণ্ড রক্তপাত", "তীব্র পেটব্যথা", "অসহ্য পেটব্যথা", "শ্বাস নিতে কষ্ট"
 ];
 
 const AMBER_PATTERNS = [
@@ -37,8 +40,14 @@ const AMBER_PATTERNS = [
   "diagnose", "do i have pcos", "prescribe", "medicine", "medication", "dosage", "tablet", "pill dose",
   "ultrasound result", "lab report", "blood test result", "hormone level",
   "should i see a doctor", "do i need a doctor", "medical advice",
+  "my symptoms", "my symptom", "my report", "my ultrasound", "my test result", "my blood test",
+  "i have pcos", "i have endometriosis", "i was diagnosed", "my pain", "my cramps",
+  "i have pain", "i have bleeding", "i am bleeding", "my discharge",
+  "my period is late", "late period", "missed my period", "should i take", "can i take", "should i stop taking",
   "অনিয়মিত মাসিক", "অনিয়মিত মাসিক", "মাসিক বন্ধ", "সাদা স্রাব", "চুলকানি", "জ্বালাপোড়া", "জ্বালাপোড়া",
-  "দুর্গন্ধ", "ডাক্তার", "ওষুধ", "চিকিৎসা", "রিপোর্ট", "পিসিওএস আছে কিনা", "সন্তান"
+  "দুর্গন্ধ", "ডাক্তার", "ওষুধ", "চিকিৎসা", "রিপোর্ট", "পিসিওএস আছে কিনা", "সন্তান",
+  "আমার লক্ষণ", "আমার রিপোর্ট", "আমার আল্ট্রাসাউন্ড", "আমার ব্যথা", "আমার ক্র্যাম্প",
+  "আমার রক্তপাত", "আমার স্রাব", "মাসিক দেরি", "আমার পিরিয়ড দেরি", "আমি কি ওষুধ খাব"
 ];
 
 const SYSTEM_INSTRUCTIONS = [
@@ -176,6 +185,10 @@ module.exports = async function handler(req, res) {
 
   if (Buffer.byteLength(JSON.stringify(body || {}), "utf8") > MAX_BODY_BYTES) {
     return res.status(413).json({ code: "request_too_large" });
+  }
+
+  if (body.consent !== true) {
+    return res.status(403).json({ code: "consent_required" });
   }
 
   if (isRateLimited(req)) {
