@@ -218,27 +218,64 @@
           <div class="emergency-card"><div class="emergency-mark">!</div><div><strong data-i18n="urgentCareTitle">Need urgent help?</strong><p data-i18n="urgentCareText">For severe symptoms or immediate danger, go to the nearest emergency department. In Bangladesh, call 999 for emergency assistance.</p></div><a href="tel:999" class="emergency-button" data-i18n="call999">Call 999</a></div>
         </section>
 
-        <section class="page" id="page-assistant" data-page="assistant">
+                <section class="page" id="page-assistant" data-page="assistant">
           <div class="page-intro">
-            <span class="eyebrow" data-i18n="assistantEyebrow">EDUCATION, WITH SAFETY FIRST</span>
-            <h1 data-i18n="assistantTitle">NariBondhu AI</h1>
-            <p data-i18n="assistantIntro">A future educational companion designed to explain women's health topics in simple English or বাংলা.</p>
+            <span class="eyebrow" data-i18n="assistantEyebrow">AVAILABLE 24/7 · EDUCATION FIRST</span>
+            <h1 data-i18n="assistantTitle">NariBondhu GPT</h1>
+            <p data-i18n="assistantIntro">A GPT-powered educational companion for women's health questions in simple English or বাংলা.</p>
           </div>
-          <div class="ai-preview-card">
-            <div class="ai-orb"><span>✧</span></div>
-            <span class="status-pill status-pending" data-i18n="notConnected">Not connected in this demo</span>
-            <h2 data-i18n="aiDemoTitle">Your AI guide needs a secure connection.</h2>
-            <p data-i18n="aiDemoText">This website is running without Google AI Studio or Gemini API tokens. No question is sent to an AI service, and no generated medical answer is simulated.</p>
-            <div class="ai-preview-actions"><button class="primary-button" type="button" data-route="learn" data-i18n="readLibrary">Read the health library</button><button class="outline-button" type="button" data-action="ai-safety">See safety principles</button></div>
-          </div>
+          <section class="ai-consent-card card" id="ai-consent-panel" aria-labelledby="ai-consent-heading">
+            <div class="ai-consent-icon" aria-hidden="true">♡</div>
+            <span class="status-pill status-pending" data-i18n="aiOptional">OPTIONAL · PRIVACY FIRST</span>
+            <h2 id="ai-consent-heading" data-i18n="aiConsentTitle">Your privacy, your choice</h2>
+            <p data-i18n="aiConsentText">Before using GPT, review what is sent. NariBondhu sends only the text in this chat after you opt in.</p>
+            <ul class="ai-consent-list">
+              <li data-i18n="aiConsentPointOne">Only the text in this chat is sent to OpenAI after you opt in.</li>
+              <li data-i18n="aiConsentPointTwo">Your period diary, symptom logs, profile, name, files and medical reports are not attached or sent automatically.</li>
+              <li data-i18n="aiConsentPointThree">NariBondhu does not save chat history. OpenAI API abuse-monitoring logs may retain prompts and responses for up to 30 days by default.</li>
+            </ul>
+            <label class="ai-consent-check" for="ai-consent-checkbox">
+              <input id="ai-consent-checkbox" type="checkbox">
+              <span data-i18n="aiConsentCheck">I understand and agree to send my chat messages to OpenAI for educational responses.</span>
+            </label>
+            <div class="ai-consent-actions">
+              <button class="primary-button" id="ai-consent-enable" type="button" data-action="enable-ai-consent" disabled data-i18n="aiConsentEnable">Agree and enable GPT</button>
+              <button class="outline-button" type="button" data-route="learn" data-i18n="readLibrary">Read the health library</button>
+            </div>
+            <a class="ai-privacy-link" href="https://platform.openai.com/docs/guides/your-data" target="_blank" rel="noopener noreferrer" data-i18n="aiPrivacyLink">Read OpenAI API data controls</a>
+          </section>
+          <section class="ai-chat-panel" id="ai-chat-panel" hidden aria-label="NariBondhu GPT chat">
+            <div class="ai-chat-shell">
+              <div class="ai-chat-header">
+                <div class="ai-chat-brand">
+                  <span class="ai-chat-avatar" aria-hidden="true">♡</span>
+                  <div><strong>NariBondhu GPT</strong><small data-i18n="aiChatSubtitle">Women's health education · English & বাংলা</small></div>
+                </div>
+                <div class="ai-chat-tools">
+                  <span class="status-pill status-pending" id="ai-connection-status" data-i18n="aiChecking">Checking GPT connection…</span>
+                  <button class="outline-button small-button" type="button" data-action="clear-ai-chat" data-i18n="aiClearChat">Clear chat</button>
+                </div>
+              </div>
+              <div class="ai-chat-disclaimer" data-i18n="aiDisclaimer">Educational information only. Not a doctor, diagnosis or treatment service.</div>
+              <div class="ai-chat-messages" id="ai-chat-messages" role="log" aria-live="polite" aria-relevant="additions text">
+                <div class="ai-empty-state"><span>♡</span><h3 data-i18n="aiEmptyTitle">A little support, whenever you need it.</h3><p data-i18n="aiEmptyText">Ask a general women's health education question. For personal or worrying symptoms, BondhuHelp is the right next step.</p></div>
+              </div>
+              <form class="ai-chat-compose" id="ai-chat-form">
+                <label class="visually-hidden" for="ai-chat-input" data-i18n="aiInputLabel">Your question</label>
+                <textarea id="ai-chat-input" maxlength="600" rows="2" data-i18n-placeholder="aiPlaceholder" placeholder="Ask an educational question…" required></textarea>
+                <button class="primary-button" id="ai-chat-send" type="submit" disabled><span data-i18n="aiSend">Send</span><span aria-hidden="true">↗</span></button>
+              </form>
+              <p class="ai-chat-footnote" data-i18n="aiNameWarning">Please do not include your name, address, phone number, ID, or medical report. Your local health diary is never sent.</p>
+            </div>
+          </section>
           <div class="ai-principles">
             <article class="card"><span class="principle-icon">◇</span><h3 data-i18n="aiPrincipleOne">Education, not diagnosis</h3><p data-i18n="aiPrincipleOneText">Explain general health topics; never diagnose a disease or prescribe medicines.</p></article>
-            <article class="card"><span class="principle-icon">♡</span><h3 data-i18n="aiPrincipleTwo">Consent before sharing</h3><p data-i18n="aiPrincipleTwoText">A future integration must clearly explain what information is sent and ask permission first.</p></article>
-            <article class="card"><span class="principle-icon">!</span><h3 data-i18n="aiPrincipleThree">Urgent symptoms come first</h3><p data-i18n="aiPrincipleThreeText">Potential emergency symptoms should lead to urgent-care guidance, not a long chat.</p></article>
+            <article class="card"><span class="principle-icon">♡</span><h3 data-i18n="aiPrincipleTwo">Consent before sharing</h3><p data-i18n="aiPrincipleTwoText">AI is optional. You can withdraw permission from Profile & Privacy at any time.</p></article>
+            <article class="card"><span class="principle-icon">!</span><h3 data-i18n="aiPrincipleThree">Urgent symptoms come first</h3><p data-i18n="aiPrincipleThreeText">Serious concerns bypass GPT and go to BondhuHelp or emergency services.</p></article>
           </div>
         </section>
 
-        <section class="page" id="page-profile" data-page="profile">
+<section class="page" id="page-profile" data-page="profile">
           <div class="page-intro">
             <span class="eyebrow" data-i18n="privacyEyebrow">YOUR CHOICES MATTER</span>
             <h1 data-i18n="profileTitle">Profile & privacy</h1>
@@ -249,18 +286,24 @@
               <div class="profile-avatar">N</div><div><span class="eyebrow" data-i18n="previewProfile">PREVIEW PROFILE</span><h2 data-i18n="guestProfile">Your private space</h2><p data-i18n="guestProfileText">No account is signed in. This is a local browser preview.</p></div>
               <div class="profile-setting"><div><strong data-i18n="languageSetting">Language</strong><small data-i18n="languageSettingText">Choose the language for the interface.</small></div><button class="outline-button small-button" type="button" id="profile-language-toggle">বাংলা</button></div>
               <div class="profile-setting"><div><strong data-i18n="discreetSetting">Discreet mode</strong><small data-i18n="discreetSettingText">Blur cycle and symptom details on this screen.</small></div><button class="toggle-switch" id="profile-discreet-toggle" type="button" role="switch" aria-checked="false" aria-label="Toggle discreet mode"><span></span></button></div>
+              <div class="profile-setting"><div><strong data-i18n="profileAiConsentTitle">GPT educational assistant</strong><small data-i18n="profileAiConsentText">Optional. Turn off at any time to stop sending chat messages.</small></div><button class="toggle-switch" id="profile-ai-consent-toggle" type="button" role="switch" aria-checked="false" aria-label="Toggle GPT data processing consent"><span></span></button></div>
             </article>
             <article class="card privacy-card">
-              <span class="eyebrow" data-i18n="privacyAtAGlance">PRIVACY AT A GLANCE</span><h2 data-i18n="localStorageTitle">Stored in this browser</h2>
-              <ul class="privacy-list"><li><span>✓</span><span data-i18n="privacyListOne">Period, symptom and wellbeing entries use this browser's local storage.</span></li><li><span>✓</span><span data-i18n="privacyListTwo">This demo does not send entries to Firebase, Gemini or another server.</span></li><li><span>✓</span><span data-i18n="privacyListThree">There is no sign-in, analytics tracker or advertising script in this demo.</span></li></ul>
-              <p class="privacy-caution" data-i18n="privacyCaution">This is not encrypted storage or a secure medical record. Avoid entering sensitive information on a shared device. Browser data may be lost if you clear site data.</p>
+              <span class="eyebrow" data-i18n="privacyAtAGlance">PRIVACY AT A GLANCE</span><h2 data-i18n="localStorageTitle">Your data stays under your control</h2>
+              <ul class="privacy-list">
+                <li><span>✓</span><span data-i18n="privacyListOne">Period, symptom and wellbeing entries stay in this browser and are never included in GPT requests.</span></li>
+                <li><span>✓</span><span data-i18n="privacyListTwo">Only after you opt in, chat text from the current session is sent to OpenAI through a private server endpoint.</span></li>
+                <li><span>✓</span><span data-i18n="privacyListThree">NariBondhu does not save chat history or automatically send names, files, reports or diary records.</span></li>
+                <li><span>✓</span><span data-i18n="privacyListFour">OpenAI API data is not used for model training by default; abuse-monitoring logs may retain prompts and responses for up to 30 days.</span></li>
+              </ul>
+              <p class="privacy-caution" data-i18n="privacyCaution">Browser entries are not encrypted. Avoid shared devices. Chat messages are processed by OpenAI only after consent; review the API data controls for retention details.</p>
             </article>
           </div>
           <article class="card data-tools-card">
             <div><span class="eyebrow" data-i18n="yourData">YOUR DATA</span><h2 data-i18n="dataControlsTitle">Export or clear your entries</h2><p data-i18n="dataControlsText">Keep a copy of your browser entries or remove them from this device.</p></div>
             <div class="data-actions"><button class="outline-button" type="button" data-action="export-data">↓ <span data-i18n="exportData">Export my data</span></button><button class="danger-button" type="button" data-action="reset-data">× <span data-i18n="clearData">Clear all local data</span></button></div>
           </article>
-          <div class="about-strip"><span class="brand-mark small-brand-mark">♡</span><div><strong>NariBondhu</strong><p data-i18n="aboutTagline">Understand your body. Recognise your needs. Reach the right care.</p><small>Web preview · v1.0 · No AI tokens required</small></div></div>
+          <div class="about-strip"><span class="brand-mark small-brand-mark">♡</span><div><strong>NariBondhu</strong><p data-i18n="aboutTagline">Understand your body. Recognise your needs. Reach the right care.</p><small>Web preview · GPT educational assistant · v1.1</small></div></div>
         </section>
 
         <footer class="app-footer"><span>© <span id="footer-year">2026</span> NariBondhu</span><span data-i18n="footerDisclaimer">Educational demo only · Not a medical service</span><a href="#profile" data-route="profile" data-i18n="footerPrivacy">Privacy & data</a></footer>

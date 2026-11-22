@@ -36,20 +36,49 @@
       privacySettings:"Privacy settings", directoryNotLiveTitle:"Live doctor booking is not connected in this web preview.",
       directoryNotLiveText:"The Android repository contains a provider catalogue, but this browser demo does not verify provider credentials, availability or fees. It therefore does not display those entries as live recommendations or accept bookings.",
       urgentCareTitle:"Need urgent help?", urgentCareText:"For severe symptoms or immediate danger, go to the nearest emergency department. In Bangladesh, call 999 for emergency assistance.",
-      assistantEyebrow:"EDUCATION, WITH SAFETY FIRST", assistantTitle:"NariBondhu AI", assistantIntro:"A future educational companion designed to explain women's health topics in simple English or বাংলা.",
-      notConnected:"Not connected in this demo", aiDemoTitle:"Your AI guide needs a secure connection.",
-      aiDemoText:"This website is running without Google AI Studio or Gemini API tokens. No question is sent to an AI service, and no generated medical answer is simulated.",
+      
+      aiOptional:"OPTIONAL · PRIVACY FIRST", aiConsentTitle:"Your privacy, your choice",
+      aiConsentText:"Before using GPT, review what is sent. NariBondhu sends only the text in this chat after you opt in.",
+      aiConsentPointOne:"Only the text in this chat is sent to OpenAI after you opt in.",
+      aiConsentPointTwo:"Your period diary, symptom logs, profile, name, files and medical reports are not attached or sent automatically.",
+      aiConsentPointThree:"NariBondhu does not save chat history. OpenAI API abuse-monitoring logs may retain prompts and responses for up to 30 days by default.",
+      aiConsentCheck:"I understand and agree to send my chat messages to OpenAI for educational responses.",
+      aiConsentEnable:"Agree and enable GPT", aiPrivacyLink:"Read OpenAI API data controls",
+      aiChatSubtitle:"Women's health education · English & বাংলা",
+      aiChecking:"Checking GPT connection…", aiConnected:"GPT connected · 24/7",
+      aiNeedsSetup:"GPT setup required", aiClearChat:"Clear chat",
+      aiEmptyTitle:"A little support, whenever you need it.",
+      aiEmptyText:"Ask a general women's health education question. For personal or worrying symptoms, BondhuHelp is the right next step.",
+      aiQuickPcos:"What is PCOS?", aiQuickCycle:"Why do cycles vary?", aiQuickPms:"What is PMS?", aiQuickDoctor:"How can I prepare for a doctor visit?",
+      aiInputLabel:"Your question", aiPlaceholder:"Ask an educational question…", aiSend:"Send", aiSending:"Sending…",
+      aiNameWarning:"Please do not include your name, address, phone number, ID, or medical report. Your local health diary is never sent.",
+      aiYou:"You", aiBot:"NariBondhu GPT", aiTyping:"NariBondhu GPT is preparing an educational response…",
+      aiConsentNeeded:"Please review and tick the consent box first.",
+      aiConsentEnabledToast:"GPT consent enabled. You can withdraw it from Profile & Privacy.",
+      aiConsentRevokedToast:"GPT consent withdrawn. This chat has been cleared.",
+      aiChatCleared:"This chat has been cleared.",
+      aiNotConfigured:"GPT is not connected yet. The site owner must add OPENAI_API_KEY in Vercel Environment Variables and redeploy.",
+      aiRateLimit:"Too many messages in a short time. Please wait a moment and try again.",
+      aiNetworkError:"The GPT service is temporarily unavailable. Please try again later or use the Health Library.",
+      aiBondhuButton:"Open BondhuHelp", aiEmergencyCall:"Call emergency 999",
+      aiEmergencyPrefix:"Emergency care needed", aiClinicalPrefix:"Qualified clinician recommended",
+      profileAiConsentTitle:"GPT educational assistant", profileAiConsentText:"Optional. Turn off at any time to stop sending chat messages.",
+      privacyListFour:"OpenAI API data is not used for model training by default; abuse-monitoring logs may retain prompts and responses for up to 30 days.",
+      aiDisclaimer:"Educational information only. Not a doctor, diagnosis or treatment service.",
+assistantEyebrow:"AVAILABLE 24/7 · EDUCATION FIRST", assistantTitle:"NariBondhu GPT", assistantIntro:"A GPT-powered educational companion for women's health questions in simple English or বাংলা.",
+      notConnected:"GPT educational assistant", aiDemoTitle:"A private GPT-powered learning companion.",
+      aiDemoText:"Ask general women's health education questions in English or Bangla. Personal medical concerns are routed to BondhuHelp instead of being answered by GPT.",
       readLibrary:"Read the health library", aiPrincipleOne:"Education, not diagnosis", aiPrincipleOneText:"Explain general health topics; never diagnose a disease or prescribe medicines.",
-      aiPrincipleTwo:"Consent before sharing", aiPrincipleTwoText:"A future integration must clearly explain what information is sent and ask permission first.",
-      aiPrincipleThree:"Urgent symptoms come first", aiPrincipleThreeText:"Potential emergency symptoms should lead to urgent-care guidance, not a long chat.",
+      aiPrincipleTwo:"Consent before sharing", aiPrincipleTwoText:"AI is optional. You can withdraw permission from Profile & Privacy at any time.",
+      aiPrincipleThree:"Urgent symptoms come first", aiPrincipleThreeText:"Serious concerns bypass GPT and go to BondhuHelp or emergency services.",
       privacyEyebrow:"YOUR CHOICES MATTER", profileTitle:"Profile & privacy", profileIntro:"Manage this browser preview and understand where your information is stored.",
       previewProfile:"PREVIEW PROFILE", guestProfile:"Your private space", guestProfileText:"No account is signed in. This is a local browser preview.",
       languageSetting:"Language", languageSettingText:"Choose the language for the interface.", discreetSetting:"Discreet mode", discreetSettingText:"Blur cycle and symptom details on this screen.",
       privacyAtAGlance:"PRIVACY AT A GLANCE", localStorageTitle:"Stored in this browser",
-      privacyListOne:"Period, symptom and wellbeing entries use this browser's local storage.",
-      privacyListTwo:"This demo does not send entries to Firebase, Gemini or another server.",
-      privacyListThree:"There is no sign-in, analytics tracker or advertising script in this demo.",
-      privacyCaution:"This is not encrypted storage or a secure medical record. Avoid entering sensitive information on a shared device. Browser data may be lost if you clear site data.",
+      privacyListOne:"Period, symptom and wellbeing entries stay in this browser and are never included in GPT requests.",
+      privacyListTwo:"Only after you opt in, chat text from the current session is sent to OpenAI through a private server endpoint.",
+      privacyListThree:"NariBondhu does not save chat history or automatically send names, files, reports or diary records.",
+      privacyCaution:"Browser entries are not encrypted. Avoid shared devices. Chat messages are processed by OpenAI only after consent; review the API data controls for retention details.",
       yourData:"YOUR DATA", dataControlsTitle:"Export or clear your entries", dataControlsText:"Keep a copy of your browser entries or remove them from this device.",
       exportData:"Export my data", clearData:"Clear all local data", aboutTagline:"Understand your body. Recognise your needs. Reach the right care.",
       footerDisclaimer:"Educational demo only · Not a medical service", footerPrivacy:"Privacy & data",
@@ -72,7 +101,7 @@
       checklistTitle:"Prepare for your appointment", checklistIntro:"A short note can help you explain what has been happening. Take only what you feel comfortable sharing.",
       checklistItems:["When did the symptom or change begin?","How often does it happen, and how long does it last?","What makes it better or worse?","What medicines or supplements are you currently taking?","Bring relevant reports or test results, if you have them."],
       copyChecklist:"Copy checklist", checklistCopied:"Checklist copied.", checklistCopyFail:"Copy is not available here; you can select and copy the checklist.",
-      aiSafetyTitle:"NariBondhu AI safety principles", aiSafetyText:"The Android implementation defines an educational-only scope. It must not diagnose, prescribe or interpret personal reports. It should encourage qualified care for persistent, worsening or uncertain concerns and urgent care for red-flag symptoms.",
+      aiSafetyTitle:"NariBondhu AI safety principles", aiSafetyText:"NariBondhu GPT provides general education only. A deterministic safety check runs before every model request. Emergency red flags bypass GPT and direct users to 999 and the nearest hospital emergency department; other clinical concerns, diagnosis requests, medication questions and personal report interpretation bypass GPT and direct users to BondhuHelp.",
       urgentReminder:"If you have very heavy bleeding with dizziness/fainting, severe pelvic pain, or pregnancy with bleeding/pain, seek urgent medical care now.",
       cycleInProgress:"Your cycle is in progress", cycleNeedData:"Start your cycle journal", cycleNeedDataText:"Add period dates to see a personal overview. Predictions stay hidden until there is enough history.",
       cycleBasedOn:"Based on {n} recorded cycle interval(s)", noLastPeriod:"No period start recorded", nextIn:"About {n} days from now", nextToday:"Estimated around today", nextPast:"The estimate date has passed",
@@ -114,20 +143,49 @@
       privacySettings:"গোপনীয়তা সেটিংস", directoryNotLiveTitle:"এই ওয়েব প্রিভিউতে সরাসরি ডাক্তার বুকিং চালু নেই।",
       directoryNotLiveText:"Android রিপোজিটরিতে চিকিৎসক তালিকার তথ্য আছে, তবে এই ব্রাউজার ডেমো চিকিৎসকের পরিচয়, সময়সূচি বা ফি যাচাই করে না। তাই সেগুলোকে বাস্তব সুপারিশ হিসেবে দেখানো বা বুকিং নেওয়া হচ্ছে না।",
       urgentCareTitle:"জরুরি সহায়তা প্রয়োজন?", urgentCareText:"গুরুতর লক্ষণ বা তাৎক্ষণিক বিপদে নিকটস্থ হাসপাতালের জরুরি বিভাগে যান। বাংলাদেশে জরুরি সহায়তার জন্য ৯৯৯-এ কল করুন।",
-      assistantEyebrow:"নিরাপত্তাকে অগ্রাধিকার দিয়ে তথ্য", assistantTitle:"নারীবন্ধু AI", assistantIntro:"সহজ বাংলা বা ইংরেজিতে নারীস্বাস্থ্য বিষয়ে তথ্য বোঝানোর জন্য ভবিষ্যতের একটি শিক্ষামূলক সহকারী।",
-      notConnected:"এই ডেমোতে সংযুক্ত নয়", aiDemoTitle:"AI সহকারীর জন্য নিরাপদ সংযোগ প্রয়োজন।",
-      aiDemoText:"এই ওয়েবসাইট Google AI Studio বা Gemini API টোকেন ছাড়া চলছে। কোনো প্রশ্ন AI সেবায় পাঠানো হয় না এবং AI উত্তর দেওয়ার ভানও করা হয় না।",
+      
+      aiOptional:"ঐচ্ছিক · গোপনীয়তা আগে", aiConsentTitle:"আপনার গোপনীয়তা, আপনার সিদ্ধান্ত",
+      aiConsentText:"GPT ব্যবহারের আগে কী তথ্য পাঠানো হবে তা জেনে নিন। সম্মতি দিলে কেবল এই চ্যাটের লেখা পাঠানো হবে। আপনার স্বাস্থ্য ডায়েরি, প্রোফাইল, নাম, ফাইল বা মেডিকেল রিপোর্ট যুক্ত করা হয় না।",
+      aiConsentPointOne:"আপনার সম্মতির পর কেবল এই চ্যাটের লেখা OpenAI-তে পাঠানো হয়।",
+      aiConsentPointTwo:"আপনার মাসিকের ডায়েরি, লক্ষণের নোট, প্রোফাইল, নাম, ফাইল বা মেডিকেল রিপোর্ট স্বয়ংক্রিয়ভাবে পাঠানো হয় না।",
+      aiConsentPointThree:"নারীবন্ধু চ্যাটের ইতিহাস সংরক্ষণ করে না। OpenAI-এর অপব্যবহার পর্যবেক্ষণ লগে সাধারণত সর্বোচ্চ ৩০ দিন প্রশ্ন ও উত্তর থাকতে পারে।",
+      aiConsentCheck:"আমি বুঝেছি এবং শিক্ষামূলক উত্তরের জন্য আমার চ্যাটের লেখা OpenAI-তে পাঠাতে সম্মতি দিচ্ছি।",
+      aiConsentEnable:"সম্মতি দিয়ে GPT চালু করুন", aiPrivacyLink:"OpenAI API তথ্য নিয়ন্ত্রণ নীতি পড়ুন",
+      aiChatSubtitle:"নারীস্বাস্থ্য শিক্ষা · বাংলা ও ইংরেজি",
+      aiChecking:"GPT সংযোগ যাচাই হচ্ছে…", aiConnected:"GPT সংযুক্ত · ২৪/৭",
+      aiNeedsSetup:"GPT সেটআপ প্রয়োজন", aiClearChat:"চ্যাট মুছুন",
+      aiEmptyTitle:"যখন প্রয়োজন, তখনই একটু সহায়তা।",
+      aiEmptyText:"নারীস্বাস্থ্য বিষয়ে সাধারণ শিক্ষামূলক প্রশ্ন করুন। ব্যক্তিগত বা উদ্বেগজনক লক্ষণের জন্য বন্ধুহেল্পে যোগাযোগ করুন।",
+      aiQuickPcos:"পিসিওএস কী?", aiQuickCycle:"মাসিকের চক্র কেন বদলায়?", aiQuickPms:"পিএমএস কী?", aiQuickDoctor:"ডাক্তারের কাছে যাওয়ার প্রস্তুতি কীভাবে নেব?",
+      aiInputLabel:"আপনার প্রশ্ন", aiPlaceholder:"শিক্ষামূলক প্রশ্ন লিখুন…", aiSend:"পাঠান", aiSending:"পাঠানো হচ্ছে…",
+      aiNameWarning:"আপনার নাম, ঠিকানা, ফোন নম্বর, পরিচয়পত্র বা মেডিকেল রিপোর্ট লিখবেন না। আপনার স্বাস্থ্য ডায়েরির তথ্য কখনো পাঠানো হয় না।",
+      aiYou:"আপনি", aiBot:"নারীবন্ধু GPT", aiTyping:"নারীবন্ধু GPT শিক্ষামূলক উত্তর তৈরি করছে…",
+      aiConsentNeeded:"আগে সম্মতির বাক্সে টিক দিন।",
+      aiConsentEnabledToast:"GPT ব্যবহারের সম্মতি চালু হয়েছে। প্রোফাইল ও গোপনীয়তা থেকে বন্ধ করতে পারবেন।",
+      aiConsentRevokedToast:"GPT ব্যবহারের সম্মতি প্রত্যাহার করা হয়েছে। এই চ্যাট মুছে ফেলা হয়েছে।",
+      aiChatCleared:"এই চ্যাট মুছে ফেলা হয়েছে।",
+      aiNotConfigured:"GPT এখনো সংযুক্ত নয়। সাইটের মালিককে Vercel Environment Variables-এ OPENAI_API_KEY যোগ করে আবার ডেপ্লয় করতে হবে।",
+      aiRateLimit:"অল্প সময়ে অনেক বার্তা পাঠানো হয়েছে। একটু অপেক্ষা করে আবার চেষ্টা করুন।",
+      aiNetworkError:"GPT সেবা সাময়িকভাবে পাওয়া যাচ্ছে না। পরে আবার চেষ্টা করুন অথবা স্বাস্থ্য পাঠাগার দেখুন।",
+      aiBondhuButton:"বন্ধুহেল্প খুলুন", aiEmergencyCall:"জরুরি সেবা ৯৯৯-এ কল করুন",
+      aiEmergencyPrefix:"জরুরি চিকিৎসা প্রয়োজন", aiClinicalPrefix:"যোগ্য চিকিৎসকের পরামর্শ প্রয়োজন",
+      profileAiConsentTitle:"GPT শিক্ষামূলক সহকারী", profileAiConsentText:"ঐচ্ছিক। চ্যাটের তথ্য পাঠানো বন্ধ করতে যেকোনো সময় বন্ধ করুন।",
+      privacyListFour:"OpenAI API-এর তথ্য সাধারণত মডেল প্রশিক্ষণে ব্যবহার হয় না; তবে অপব্যবহার পর্যবেক্ষণ লগে সর্বোচ্চ ৩০ দিন প্রশ্ন ও উত্তর থাকতে পারে।",
+      aiDisclaimer:"শুধু শিক্ষামূলক তথ্য। এটি ডাক্তার, রোগ নির্ণয় বা চিকিৎসাসেবা নয়।",
+assistantEyebrow:"২৪/৭ উপলভ্য · শিক্ষামূলক সহায়তা", assistantTitle:"নারীবন্ধু GPT", assistantIntro:"নারীস্বাস্থ্য বিষয়ে সহজ বাংলা বা ইংরেজিতে সাধারণ তথ্য জানতে GPT-চালিত শিক্ষামূলক সহকারী।",
+      notConnected:"GPT শিক্ষামূলক সহকারী", aiDemoTitle:"আপনার ব্যক্তিগত GPT শিক্ষাসঙ্গী।",
+      aiDemoText:"বাংলা বা ইংরেজিতে নারীস্বাস্থ্য বিষয়ে সাধারণ তথ্য জানতে প্রশ্ন করুন। ব্যক্তিগত চিকিৎসাগত উদ্বেগের উত্তর GPT দেবে না—বন্ধুহেল্পে পাঠাবে।",
       readLibrary:"স্বাস্থ্য পাঠাগার পড়ুন", aiPrincipleOne:"শিক্ষা, রোগ নির্ণয় নয়", aiPrincipleOneText:"সাধারণ স্বাস্থ্য বিষয় ব্যাখ্যা করবে; রোগ নির্ণয় বা ওষুধের পরামর্শ দেবে না।",
-      aiPrincipleTwo:"তথ্য শেয়ারের আগে সম্মতি", aiPrincipleTwoText:"ভবিষ্যতের সংযোগে কোন তথ্য পাঠানো হবে তা স্পষ্টভাবে জানিয়ে আগে অনুমতি নিতে হবে।",
-      aiPrincipleThree:"জরুরি লক্ষণ আগে", aiPrincipleThreeText:"সম্ভাব্য জরুরি লক্ষণে দীর্ঘ কথোপকথন নয়, দ্রুত চিকিৎসা নেওয়ার নির্দেশনা দিতে হবে।",
+      aiPrincipleTwo:"তথ্য শেয়ারের আগে সম্মতি", aiPrincipleTwoText:"AI ঐচ্ছিক। প্রোফাইল ও গোপনীয়তা থেকে যেকোনো সময় অনুমতি প্রত্যাহার করতে পারবেন।",
+      aiPrincipleThree:"জরুরি লক্ষণ আগে", aiPrincipleThreeText:"গুরুতর সমস্যা GPT-তে উত্তর না দিয়ে বন্ধুহেল্প বা জরুরি সেবায় পাঠানো হবে।",
       privacyEyebrow:"আপনার সিদ্ধান্ত গুরুত্বপূর্ণ", profileTitle:"প্রোফাইল ও গোপনীয়তা", profileIntro:"এই ব্রাউজার প্রিভিউ পরিচালনা করুন এবং আপনার তথ্য কোথায় থাকে তা জানুন।",
       previewProfile:"প্রিভিউ প্রোফাইল", guestProfile:"আপনার ব্যক্তিগত জায়গা", guestProfileText:"কোনো অ্যাকাউন্টে সাইন ইন করা নেই। এটি স্থানীয় ব্রাউজার প্রিভিউ।",
       languageSetting:"ভাষা", languageSettingText:"ইন্টারফেসের ভাষা বেছে নিন।", discreetSetting:"গোপনীয় মোড", discreetSettingText:"এই পর্দায় চক্র ও লক্ষণের তথ্য ঝাপসা করে রাখুন।",
       privacyAtAGlance:"এক নজরে গোপনীয়তা", localStorageTitle:"এই ব্রাউজারে সংরক্ষিত",
-      privacyListOne:"মাসিক, লক্ষণ ও সুস্থতার নোট এই ব্রাউজারের লোকাল স্টোরেজে থাকে।",
-      privacyListTwo:"এই ডেমো কোনো তথ্য Firebase, Gemini বা অন্য সার্ভারে পাঠায় না।",
-      privacyListThree:"এই ডেমোতে সাইন-ইন, অ্যানালিটিক্স ট্র্যাকার বা বিজ্ঞাপনের স্ক্রিপ্ট নেই।",
-      privacyCaution:"এটি এনক্রিপ্ট করা স্টোরেজ বা নিরাপদ মেডিকেল রেকর্ড নয়। অন্যের সঙ্গে শেয়ার করা ডিভাইসে সংবেদনশীল তথ্য লিখবেন না। ব্রাউজারের সাইট ডেটা মুছে ফেললে তথ্য হারিয়ে যেতে পারে।",
+      privacyListOne:"মাসিক, লক্ষণ ও সুস্থতার তথ্য এই ব্রাউজারেই থাকে; GPT-তে পাঠানো হয় না।",
+      privacyListTwo:"আপনি সম্মতি দিলেই কেবল বর্তমান চ্যাটের লেখা নিরাপদ সার্ভার সংযোগের মাধ্যমে OpenAI-তে পাঠানো হয়।",
+      privacyListThree:"নারীবন্ধু চ্যাটের ইতিহাস সংরক্ষণ করে না এবং স্বয়ংক্রিয়ভাবে নাম, ফাইল, রিপোর্ট বা ডায়েরির তথ্য পাঠায় না।",
+      privacyCaution:"ব্রাউজারের তথ্য এনক্রিপ্ট করা নয়। অন্যের সঙ্গে শেয়ার করা ডিভাইস এড়িয়ে চলুন। সম্মতির পর চ্যাট OpenAI প্রক্রিয়া করে; তথ্য কতদিন থাকে জানতে API data controls দেখুন।",
       yourData:"আপনার তথ্য", dataControlsTitle:"তথ্য এক্সপোর্ট বা মুছে ফেলুন", dataControlsText:"ব্রাউজারের তথ্যের একটি কপি রাখুন অথবা এই ডিভাইস থেকে মুছে ফেলুন।",
       exportData:"আমার তথ্য এক্সপোর্ট", clearData:"সব স্থানীয় তথ্য মুছুন", aboutTagline:"নিজের শরীরকে জানুন। প্রয়োজন বুঝুন। সঠিক যত্নে পৌঁছান।",
       footerDisclaimer:"শিক্ষামূলক ডেমো · চিকিৎসাসেবা নয়", footerPrivacy:"গোপনীয়তা ও তথ্য",
@@ -150,7 +208,7 @@
       checklistTitle:"চিকিৎসকের কাছে যাওয়ার প্রস্তুতি", checklistIntro:"কী হচ্ছে তার ছোট একটি তালিকা চিকিৎসককে বুঝতে সাহায্য করতে পারে। যতটুকু শেয়ার করতে স্বাচ্ছন্দ্যবোধ করেন, ততটুকুই নিন।",
       checklistItems:["লক্ষণ বা পরিবর্তন কখন শুরু হয়েছে?","কতবার হয় এবং কতক্ষণ থাকে?","কীসে বাড়ে বা কমে?","এখন কী ওষুধ বা সাপ্লিমেন্ট নিচ্ছেন?","থাকলে প্রাসঙ্গিক রিপোর্ট বা পরীক্ষার ফল সঙ্গে নিন।"],
       copyChecklist:"চেকলিস্ট কপি করুন", checklistCopied:"চেকলিস্ট কপি হয়েছে।", checklistCopyFail:"এখানে কপি করা যাচ্ছে না; তালিকাটি নির্বাচন করে কপি করতে পারেন।",
-      aiSafetyTitle:"নারীবন্ধু AI-এর নিরাপত্তা নীতি", aiSafetyText:"Android সংস্করণে AI-এর কাজ শিক্ষামূলক তথ্য দেওয়া। এটি রোগ নির্ণয়, ওষুধ দেওয়া বা ব্যক্তিগত রিপোর্ট ব্যাখ্যা করবে না। দীর্ঘস্থায়ী, বাড়তে থাকা বা অনিশ্চিত সমস্যায় যোগ্য চিকিৎসকের পরামর্শ এবং বিপজ্জনক লক্ষণে জরুরি সেবা নিতে বলবে।",
+      aiSafetyTitle:"নারীবন্ধু AI-এর নিরাপত্তা নীতি", aiSafetyText:"নারীবন্ধু GPT কেবল সাধারণ শিক্ষামূলক তথ্য দেয়। প্রতিটি GPT অনুরোধের আগে স্বয়ংক্রিয় নিরাপত্তা যাচাই হয়। জরুরি লক্ষণ থাকলে GPT উত্তর না দিয়ে ৯৯৯ ও নিকটস্থ হাসপাতালের জরুরি বিভাগে পাঠায়; অন্যান্য চিকিৎসাগত উদ্বেগ, রোগ নির্ণয়, ওষুধ বা ব্যক্তিগত রিপোর্টের প্রশ্ন বন্ধুহেল্পে পাঠায়।",
       urgentReminder:"অতিরিক্ত রক্তপাতের সঙ্গে মাথা ঘোরা/অজ্ঞান হওয়া, তীব্র তলপেটের ব্যথা বা গর্ভাবস্থায় রক্তপাত/ব্যথা হলে এখনই জরুরি চিকিৎসা নিন।",
       cycleInProgress:"আপনার চক্র চলমান", cycleNeedData:"চক্রের ডায়েরি শুরু করুন", cycleNeedDataText:"ব্যক্তিগত সারসংক্ষেপ দেখতে মাসিকের তারিখ যোগ করুন। পর্যাপ্ত ইতিহাস না থাকলে অনুমান দেখানো হবে না।",
       cycleBasedOn:"{n}টি চক্রের ব্যবধানের ভিত্তিতে", noLastPeriod:"মাসিক শুরুর তারিখ নেই", nextIn:"আর প্রায় {n} দিন", nextToday:"আজকের আশেপাশে সম্ভাব্য", nextPast:"সম্ভাব্য তারিখটি পেরিয়ে গেছে",
@@ -213,6 +271,12 @@
   let articleFilter = "all";
   let toastTimer = null;
   let state = loadState();
+  // Chat messages are memory-only: they are never written to localStorage.
+  let assistantMessages = [];
+  let assistantBusy = false;
+  let assistantApiStatus = null;
+  let assistantStatusChecked = false;
+  let assistantAbortController = null;
 
   function localDateISO(date) {
     const y = date.getFullYear();
@@ -252,6 +316,7 @@
     return {
       language:"en",
       discreetMode:false,
+      aiConsent:false,
       demoMode:true,
       periods:[
         {id:"sample-period-a", kind:"period", start:previous, end:shiftDate(previous,4), note:""},
@@ -340,6 +405,9 @@
     const profileDiscreet = $("#profile-discreet-toggle");
     if (discreet) discreet.setAttribute("aria-pressed", String(!!state.discreetMode));
     if (profileDiscreet) profileDiscreet.setAttribute("aria-checked", String(!!state.discreetMode));
+    const profileAiConsent = $("#profile-ai-consent-toggle");
+    if (profileAiConsent) profileAiConsent.setAttribute("aria-checked", String(!!state.aiConsent));
+    $("[data-i18n-placeholder]").forEach(node => node.setAttribute("placeholder", tr(node.dataset.i18nPlaceholder)));
     document.body.classList.toggle("discreet-mode", !!state.discreetMode);
     $("#demo-banner").hidden = !state.demoMode;
   }
@@ -360,6 +428,120 @@
     renderHistory();
     renderDiary();
     renderArticles();
+    renderAssistant();
+  }
+  function renderAssistant() {
+    const gate = $("#ai-consent-panel");
+    const panel = $("#ai-chat-panel");
+    if (!gate || !panel) return;
+    gate.hidden = !!state.aiConsent;
+    panel.hidden = !state.aiConsent;
+    if (!state.aiConsent) return;
+    const status = $("#ai-connection-status");
+    if (status) {
+      status.textContent = assistantApiStatus === true ? tr("aiConnected") : assistantApiStatus === false ? tr("aiNeedsSetup") : tr("aiChecking");
+      status.classList.toggle("status-online", assistantApiStatus === true);
+      status.classList.toggle("status-pending", assistantApiStatus !== true);
+    }
+    const list = $("#ai-chat-messages");
+    if (list) {
+      if (!assistantMessages.length) {
+        list.innerHTML = '<div class="ai-empty-state"><span>♡</span><h3>' + escapeHTML(tr("aiEmptyTitle")) + '</h3><p>' + escapeHTML(tr("aiEmptyText")) + '</p><div class="ai-quick-prompts">' +
+          [["What is PCOS?","aiQuickPcos"],["Why do cycles vary?","aiQuickCycle"],["What is PMS?","aiQuickPms"],["How can I prepare for a doctor visit?","aiQuickDoctor"]]
+          .map(([en,key]) => '<button type="button" class="quick-prompt-chip" data-ai-prompt="' + escapeHTML(state.language === "bn" ? tr(key) : en) + '">' + escapeHTML(tr(key)) + '</button>').join("") +
+          '</div></div>';
+      } else {
+        list.innerHTML = assistantMessages.map(message => {
+          if (message.role === "user") {
+            return '<div class="chat-message user"><div class="chat-bubble"><span class="chat-message-label">' + escapeHTML(tr("aiYou")) + '</span><p>' + escapeHTML(message.content).replace(/\n/g,"<br>") + '</p></div></div>';
+          }
+          const safety = ["red","amber","system"].includes(message.safety) ? message.safety : "green";
+          const label = safety === "red" ? tr("aiEmergencyPrefix") : safety === "amber" ? tr("aiClinicalPrefix") : tr("aiBot");
+          let actions = "";
+          if (safety === "red") {
+            actions += '<a class="chat-cta emergency" href="tel:999">' + escapeHTML(tr("aiEmergencyCall")) + '</a>';
+            actions += '<a class="chat-cta" href="#bondhuhelp" data-route="bondhuhelp">' + escapeHTML(tr("aiBondhuButton")) + '</a>';
+          } else if (safety === "amber") {
+            actions += '<a class="chat-cta" href="#bondhuhelp" data-route="bondhuhelp">' + escapeHTML(tr("aiBondhuButton")) + '</a>';
+          } else if (safety === "system") {
+            actions += '<a class="chat-cta secondary" href="#learn" data-route="learn">' + escapeHTML(tr("readLibrary")) + '</a>';
+          }
+          return '<div class="chat-message assistant ' + safety + '"><span class="chat-bot-mark" aria-hidden="true">♡</span><div class="chat-bubble"><span class="chat-message-label">' + escapeHTML(label) + '</span><p>' + escapeHTML(message.content).replace(/\n/g,"<br>") + '</p>' + actions + '</div></div>';
+        }).join("");
+      }
+      if (assistantBusy) list.insertAdjacentHTML("beforeend", '<div class="chat-message assistant typing"><span class="chat-bot-mark" aria-hidden="true">♡</span><div class="chat-bubble"><span class="chat-message-label">' + escapeHTML(tr("aiBot")) + '</span><p>' + escapeHTML(tr("aiTyping")) + '</p></div></div>');
+      list.scrollTop = list.scrollHeight;
+    }
+    const input = $("#ai-chat-input");
+    const send = $("#ai-chat-send");
+    if (input) input.disabled = assistantBusy;
+    if (send) {
+      send.disabled = assistantBusy || !input || !input.value.trim();
+      const label = send.querySelector("[data-i18n]");
+      if (label) label.textContent = assistantBusy ? tr("aiSending") : tr("aiSend");
+    }
+    if (currentRoute() === "assistant" && !assistantStatusChecked) checkAssistantStatus();
+  }
+  async function checkAssistantStatus() {
+    if (assistantStatusChecked) return;
+    assistantStatusChecked = true;
+    try {
+      const response = await fetch("/api/chat", {method:"GET",cache:"no-store"});
+      const data = await response.json();
+      assistantApiStatus = response.ok && data.configured === true;
+    } catch (error) {
+      assistantApiStatus = false;
+    }
+    renderAssistant();
+  }
+  async function sendAssistantMessage(rawText) {
+    if (!state.aiConsent) { showToast(tr("aiConsentNeeded")); return; }
+    if (assistantBusy) return;
+    const content = String(rawText || "").trim().slice(0,600);
+    if (!content) return;
+    assistantMessages.push({role:"user",content});
+    assistantMessages = assistantMessages.slice(-16);
+    assistantBusy = true;
+    assistantAbortController = new AbortController();
+    renderAssistant();
+    try {
+      const response = await fetch("/api/chat", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        cache:"no-store",
+        signal:assistantAbortController.signal,
+        body:JSON.stringify({
+          consent:true,
+          language:state.language,
+          messages:assistantMessages.slice(-8).map(item=>({role:item.role,content:item.content}))
+        })
+      });
+      let data = {};
+      try { data = await response.json(); } catch (error) {}
+      if (!response.ok) {
+        const errorKey = data.code === "not_configured" ? "aiNotConfigured" : data.code === "rate_limited" ? "aiRateLimit" : "aiNetworkError";
+        throw new Error(tr(errorKey));
+      }
+      if (!state.aiConsent) return;
+      assistantMessages.push({role:"assistant",content:String(data.message || tr("aiNetworkError")),safety:data.safety || "green",emergency:!!data.emergency,bondhuHelp:!!data.bondhuHelp});
+      assistantMessages = assistantMessages.slice(-16);
+    } catch (error) {
+      if (error.name !== "AbortError" && state.aiConsent) assistantMessages.push({role:"assistant",content:error.message || tr("aiNetworkError"),safety:"system"});
+    } finally {
+      assistantBusy = false;
+      assistantAbortController = null;
+      renderAssistant();
+    }
+  }
+  function revokeAiConsent() {
+    state.aiConsent = false;
+    if (assistantAbortController) assistantAbortController.abort();
+    assistantAbortController = null;
+    assistantBusy = false;
+    assistantMessages = [];
+    saveState();
+    renderApp();
+    showToast(tr("aiConsentRevokedToast"));
   }
   function renderHome() {
     const metrics = cycleMetrics();
@@ -540,10 +722,10 @@
     state.periods = [];
     state.symptoms = [];
     state.wellness = [];
-    saveState();
-    closeDialog();
-    renderApp();
-    showToast(tr("dataCleared"));
+    state.aiConsent = false;
+    if (assistantAbortController) assistantAbortController.abort();
+    assistantAbortController = null; assistantBusy = false; assistantMessages = [];
+    saveState(); closeDialog(); renderApp(); showToast(tr("dataCleared"));
   }
   function exportData() {
     const payload = {
@@ -602,6 +784,17 @@
     else if (action === "export-data") exportData();
     else if (action === "reset-data") openDialog(tr("clearConfirmTitle"),'<div class="dialog-copy"><p>' + escapeHTML(tr("clearConfirmText")) + '</p><div class="form-actions"><button class="outline-button" type="button" data-action="close-dialog">' + escapeHTML(tr("cancel")) + '</button><button class="danger-button" type="button" data-action="confirm-clear">' + escapeHTML(tr("confirmClear")) + '</button></div></div>');
     else if (action === "confirm-clear") clearAllData();
+    else if (action === "enable-ai-consent") {
+      const checkbox = $("#ai-consent-checkbox");
+      if (!checkbox || !checkbox.checked) { showToast(tr("aiConsentNeeded")); return; }
+      state.aiConsent = true; saveState(); renderApp(); showToast(tr("aiConsentEnabledToast"));
+    }
+    else if (action === "revoke-ai-consent") revokeAiConsent();
+    else if (action === "clear-ai-chat") {
+      if (assistantAbortController) assistantAbortController.abort();
+      assistantAbortController = null; assistantBusy = false; assistantMessages = [];
+      renderAssistant(); showToast(tr("aiChatCleared"));
+    }
   }
 
   document.addEventListener("click", event => {
@@ -624,6 +817,8 @@
     }
     const articleTarget = event.target.closest("[data-read-article]");
     if (articleTarget) { openArticle(articleTarget.dataset.readArticle); return; }
+    const promptTarget = event.target.closest("[data-ai-prompt]");
+    if (promptTarget) { sendAssistantMessage(promptTarget.dataset.aiPrompt); return; }
     const filterTarget = event.target.closest("[data-filter]");
     if (filterTarget) {
       articleFilter = filterTarget.dataset.filter;
@@ -634,8 +829,25 @@
 
   document.addEventListener("submit", event => {
     if (event.target.matches("#period-form,#symptom-form,#wellness-form")) {
+      event.preventDefault(); submitForm(event.target);
+    } else if (event.target.matches("#ai-chat-form")) {
       event.preventDefault();
-      submitForm(event.target);
+      const input = $("#ai-chat-input");
+      const value = input ? input.value : "";
+      if (input) input.value = "";
+      sendAssistantMessage(value);
+    }
+  });
+  document.addEventListener("change", event => {
+    if (event.target.matches("#ai-consent-checkbox")) {
+      const button = $("#ai-consent-enable");
+      if (button) button.disabled = !event.target.checked;
+    }
+  });
+  document.addEventListener("input", event => {
+    if (event.target.matches("#ai-chat-input")) {
+      const button = $("#ai-chat-send");
+      if (button) button.disabled = assistantBusy || !event.target.value.trim();
     }
   });
 
@@ -654,6 +866,10 @@
   $("#profile-discreet-toggle").addEventListener("click", () => {
     state.discreetMode = !state.discreetMode;
     saveState(); renderApp();
+  });
+  $("#profile-ai-consent-toggle").addEventListener("click", () => {
+    if (state.aiConsent) revokeAiConsent();
+    else { state.aiConsent = true; saveState(); renderApp(); showToast(tr("aiConsentEnabledToast")); }
   });
   $("#app-dialog").addEventListener("click", event => {
     if (event.target === $("#app-dialog")) closeDialog();
