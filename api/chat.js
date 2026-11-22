@@ -8,7 +8,7 @@
  * OpenAI abuse-monitoring retention still applies by default (up to 30 days).
  */
 
-const DEFAULT_MODEL = "gpt-5.6-luna";
+const DEFAULT_MODEL = "gpt-6-luna";
 const MAX_BODY_BYTES = 12000;
 const MAX_MESSAGES = 8;
 const MAX_USER_CHARS = 600;
