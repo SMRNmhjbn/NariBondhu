@@ -484,3 +484,5 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .ai-consent-actions { width:100%; }
   .ai-consent-actions button { flex:1 1 100%; }
 }
+
+.ai-consent-care-note { margin:2px 0 0; color:#857987; font-size:9px; line-height:1.6; }

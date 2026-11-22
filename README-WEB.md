@@ -11,7 +11,7 @@ A no-build, browser-based NariBondhu companion site with an optional GPT educati
 5. Set **Output Directory** to `web` (also defined in the root `vercel.json`).
 6. Deploy the branch or merge the pull request into `main`.
 
-The site itself is static. The `api/chat.js` file is a Vercel Node.js Function; no npm package is required.
+The site itself is static. The `api/chat.js` file is a Vercel Node.js Function with a 30-second maximum duration; no npm package is required.
 
 ## Configure the GPT assistant
 
