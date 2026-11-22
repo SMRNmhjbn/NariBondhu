@@ -76,8 +76,13 @@ function classifySafety(messages) {
 
   if (redMatch) return "red";
 
+  const personalConcernMatch =
+    (/\b(i am|i'm|i have|i've been|i feel|my)\b.{0,55}\b(pain|bleed|bleeding|discharge|itch|cramp|symptom|fever|dizz|headache|nausea|vomit|swelling|burning|rash|odour|odor)\b/i.test(text)) ||
+    (/(আমার|আমি).{0,45}(ব্যথা|রক্তপাত|স্রাব|চুলকানি|জ্বালা|মাথা ঘোরা|জ্বর|লক্ষণ|দুর্গন্ধ)/.test(text));
+
   const amberMatch = AMBER_PATTERNS.some((pattern) => text.includes(pattern)) ||
-    (/(symptom|pain|bleed|discharge|itch|লক্ষণ|ব্যথা|রক্তপাত|স্রাব).{0,50}(weeks|persistent|worsening|বারবার|দীর্ঘদিন|বাড়ছে|বাড়ছে)/i.test(text));
+    (/(symptom|pain|bleed|discharge|itch|লক্ষণ|ব্যথা|রক্তপাত|স্রাব).{0,50}(weeks|persistent|worsening|বারবার|দীর্ঘদিন|বাড়ছে|বাড়ছে)/i.test(text)) ||
+    personalConcernMatch;
 
   if (amberMatch) return "amber";
   return "green";
